@@ -23,6 +23,7 @@ const investmentPlanRouter = require('./routes/investmentPlan')
 const investmentRouter = require('./routes/investment')
 const smartSaveRouter = require('./routes/smartSave')
 const percentageRouter = require('./routes/percentage')
+const waitlistRouter = require('./routes/waitlist')
 app.use(express.json());
 app.use(cors())
 
@@ -38,6 +39,8 @@ app.use('/api/v1/investmentPlan', investmentPlanRouter)
 app.use('/api/v1', investmentRouter)
 app.use('/api/v1', smartSaveRouter)
 app.use('/api/v1', percentageRouter)
+app.use('/api', waitlistRouter)
+app.use('/api/v1', waitlistRouter)
 
 app.use((err, req, res, next) => {
   if (err && (err.type === 'entity.parse.failed' || err instanceof SyntaxError)) {

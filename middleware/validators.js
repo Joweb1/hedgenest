@@ -668,3 +668,63 @@ exports.payoutValidator = (req, res, next) => {
   }
   next();
 };
+
+const { ALLOWED_AMOUNT_RANGES } = require("../model/waitlist");
+
+exports.waitlistValidator = (req, res, next) => {
+  const schema = joi.object({
+    firstName: joi
+      .string()
+      .trim()
+      .pattern(/^[A-Za-z\s-]{2,}$/)
+      .required()
+      .messages({
+        "any.required": "FirstName is required",
+        "string.empty": "FirstName cannot be empty",
+        "string.pattern.base":
+          "FirstName must contain only letters and be at least 2 characters",
+      }),
+    lastName: joi
+      .string()
+      .trim()
+      .pattern(/^[A-Za-z\s-]{2,}$/)
+      .required()
+      .messages({
+        "any.required": "LastName is required",
+        "string.empty": "LastName cannot be empty",
+        "string.pattern.base":
+          "LastName must contain only letters and be at least 2 characters",
+      }),
+    email: joi
+      .string()
+      .trim()
+      .email()
+      .required()
+      .messages({
+        "any.required": "Email is required",
+        "string.empty": "Email cannot be empty",
+        "string.email": "Email must be a valid email",
+      }),
+    amountRange: joi
+      .string()
+      .trim()
+      .valid(...ALLOWED_AMOUNT_RANGES)
+      .required()
+      .messages({
+        "any.required": "Amount range is required",
+        "string.empty": "Amount range cannot be empty",
+        "any.only": "Invalid amount range selection",
+      }),
+  });
+
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
+  req.body = value;
+  next();
+};
+
