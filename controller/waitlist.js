@@ -5,6 +5,27 @@ const {
   waitlistVerificationTemplate,
   waitlistWelcomeTemplate,
 } = require("../email");
+const {
+  renderWaitlistSuccessPage,
+  renderWaitlistErrorPage,
+} = require("../utils/waitlistLandingPage");
+
+const getBackendUrl = (req) => {
+  if (process.env.BACKEND_URL) return process.env.BACKEND_URL;
+  if (process.env.APP_BASE_URL) return process.env.APP_BASE_URL;
+  const host = req?.get ? req.get("host") : null;
+  const protocol = req?.protocol || "http";
+  if (host) return `${protocol}://${host}`;
+  return "http://localhost:3333";
+};
+
+const getFrontendUrl = () => {
+  return (
+    process.env.CLIENT_URL ||
+    process.env.FRONTEND_URL ||
+    "https://hedge-nest.vercel.app"
+  );
+};
 
 const generateReferralCode = async () => {
   let isUnique = false;
@@ -74,12 +95,14 @@ exports.joinWaitlist = async (req, res) => {
 
     await waitlistUser.save();
 
-    const baseUrl =
-      process.env.CLIENT_URL ||
-      process.env.FRONTEND_URL ||
-      "https://hedge-nest.vercel.app";
-    const referralLink = `${baseUrl}/waitlist?ref=${referralCode}`;
-    const verifyUrl = `${baseUrl}/waitlist/verify?token=${verificationToken}&email=${encodeURIComponent(normalizedEmail)}`;
+    const frontendUrl = getFrontendUrl();
+    const backendUrl = getBackendUrl(req);
+
+    // Referral link takes referred users to the frontend waitlist page
+    const referralLink = `${frontendUrl}/waitlist?ref=${referralCode}`;
+
+    // Verification link takes the user directly to this backend landing page with confetti animation
+    const verifyUrl = `${backendUrl}/api/v1/waitlist/verify?token=${verificationToken}`;
 
     // Send Email 1: Verification Email
     try {
@@ -109,6 +132,7 @@ exports.joinWaitlist = async (req, res) => {
         signupBonus: waitlistUser.signupBonus,
         referralCode: waitlistUser.referralCode,
         referralLink,
+        verifyUrl,
         referralReward: waitlistUser.referralReward,
         isVerified: false,
         verificationToken,
@@ -125,11 +149,24 @@ exports.joinWaitlist = async (req, res) => {
 };
 
 exports.verifyWaitlistEmail = async (req, res) => {
+  const isHtmlRequest =
+    req.method === "GET" &&
+    (!req.headers.accept || !req.headers.accept.includes("application/json"));
+
   try {
     const token = req.body?.token || req.query?.token;
     const email = (req.body?.email || req.query?.email || "").trim().toLowerCase();
 
     if (!token && !email) {
+      if (isHtmlRequest) {
+        return res
+          .status(400)
+          .send(
+            renderWaitlistErrorPage({
+              message: "Verification token is required.",
+            })
+          );
+      }
       return res.status(400).json({
         success: false,
         message: "Verification token is required",
@@ -142,14 +179,27 @@ exports.verifyWaitlistEmail = async (req, res) => {
       waitlistUser = await waitlistModel.findOne({ verificationToken: token });
     }
 
+    // If token not found, check if already verified by email
     if (!waitlistUser && email) {
       const userByEmail = await waitlistModel.findOne({ email });
       if (userByEmail && userByEmail.isVerified) {
-        const baseUrl =
-          process.env.CLIENT_URL ||
-          process.env.FRONTEND_URL ||
-          "https://hedge-nest.vercel.app";
-        const referralLink = `${baseUrl}/waitlist?ref=${userByEmail.referralCode}`;
+        const frontendUrl = getFrontendUrl();
+        const referralLink = `${frontendUrl}/waitlist?ref=${userByEmail.referralCode}`;
+        const totalCount = await waitlistModel.countDocuments();
+
+        if (isHtmlRequest) {
+          return res.status(200).send(
+            renderWaitlistSuccessPage({
+              firstName: userByEmail.firstName,
+              waitlistPosition: userByEmail.waitlistPosition || 1,
+              totalWaitlistCount: totalCount,
+              referralCode: userByEmail.referralCode,
+              referralLink,
+              signupBonus: userByEmail.signupBonus,
+              referralReward: userByEmail.referralReward,
+            })
+          );
+        }
 
         return res.status(200).json({
           success: true,
@@ -169,6 +219,14 @@ exports.verifyWaitlistEmail = async (req, res) => {
     }
 
     if (!waitlistUser) {
+      if (isHtmlRequest) {
+        return res.status(400).send(
+          renderWaitlistErrorPage({
+            message:
+              "Invalid or expired verification link. Please request a new verification email.",
+          })
+        );
+      }
       return res.status(400).json({
         success: false,
         message: "Invalid or expired verification token",
@@ -179,6 +237,14 @@ exports.verifyWaitlistEmail = async (req, res) => {
       waitlistUser.verificationExpires &&
       Date.now() > waitlistUser.verificationExpires
     ) {
+      if (isHtmlRequest) {
+        return res.status(400).send(
+          renderWaitlistErrorPage({
+            message:
+              "This verification link has expired (valid for 24 hours). Please request a new verification email.",
+          })
+        );
+      }
       return res.status(400).json({
         success: false,
         message:
@@ -186,7 +252,7 @@ exports.verifyWaitlistEmail = async (req, res) => {
       });
     }
 
-    // Mark as verified
+    // Mark user as verified
     waitlistUser.isVerified = true;
     waitlistUser.status = "active";
     waitlistUser.verifiedAt = new Date();
@@ -207,18 +273,16 @@ exports.verifyWaitlistEmail = async (req, res) => {
     waitlistUser.waitlistPosition = position;
     await waitlistUser.save();
 
-
-    const baseUrl =
-      process.env.CLIENT_URL ||
-      process.env.FRONTEND_URL ||
-      "https://hedge-nest.vercel.app";
-    const referralLink = `${baseUrl}/waitlist?ref=${waitlistUser.referralCode}`;
+    const totalWaitlistCount = await waitlistModel.countDocuments();
+    const frontendUrl = getFrontendUrl();
+    const referralLink = `${frontendUrl}/waitlist?ref=${waitlistUser.referralCode}`;
 
     // Send Email 2: Congratulations & Waitlist Spot Email
     try {
       const welcomeHtml = waitlistWelcomeTemplate({
         name: waitlistUser.firstName,
         waitlistPosition: position,
+        totalWaitlistCount,
         referralCode: waitlistUser.referralCode,
         referralLink,
         signupBonus: waitlistUser.signupBonus,
@@ -227,7 +291,7 @@ exports.verifyWaitlistEmail = async (req, res) => {
 
       await sendEmail(
         waitlistUser.email,
-        `You're #${position} on the Hedgenest Waitlist! 🎉`,
+        `You’re in. Spot secured! 🎉 (#${position})`,
         welcomeHtml
       );
     } catch (mailError) {
@@ -237,12 +301,21 @@ exports.verifyWaitlistEmail = async (req, res) => {
       );
     }
 
-    if (req.method === "GET" && req.query.redirect === "true") {
-      return res.redirect(
-        `${baseUrl}/waitlist/success?verified=true&position=${position}&ref=${waitlistUser.referralCode}`
-      );
+    // Render backend celebration landing page with graffiti / confetti animation
+    if (isHtmlRequest) {
+      const successHtml = renderWaitlistSuccessPage({
+        firstName: waitlistUser.firstName,
+        waitlistPosition: position,
+        totalWaitlistCount,
+        referralCode: waitlistUser.referralCode,
+        referralLink,
+        signupBonus: waitlistUser.signupBonus,
+        referralReward: waitlistUser.referralReward,
+      });
+      return res.status(200).send(successHtml);
     }
 
+    // JSON response for API clients
     return res.status(200).json({
       success: true,
       message: "Email verified successfully! Your waitlist spot is secured.",
@@ -250,6 +323,7 @@ exports.verifyWaitlistEmail = async (req, res) => {
         firstName: waitlistUser.firstName,
         email: waitlistUser.email,
         waitlistPosition: position,
+        totalWaitlistCount,
         signupBonus: waitlistUser.signupBonus,
         referralCode: waitlistUser.referralCode,
         referralLink,
@@ -259,6 +333,13 @@ exports.verifyWaitlistEmail = async (req, res) => {
     });
   } catch (error) {
     console.error("Waitlist email verification error:", error);
+    if (isHtmlRequest) {
+      return res
+        .status(500)
+        .send(
+          renderWaitlistErrorPage({ message: "An unexpected error occurred." })
+        );
+    }
     return res.status(500).json({
       success: false,
       message: "Error verifying waitlist email",
@@ -293,11 +374,9 @@ exports.resendVerificationEmail = async (req, res) => {
     waitlistUser.verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await waitlistUser.save();
 
-    const baseUrl =
-      process.env.CLIENT_URL ||
-      process.env.FRONTEND_URL ||
-      "https://hedge-nest.vercel.app";
-    const verifyUrl = `${baseUrl}/waitlist/verify?token=${verificationToken}&email=${encodeURIComponent(normalizedEmail)}`;
+    const backendUrl = getBackendUrl(req);
+    const verifyUrl = `${backendUrl}/api/v1/waitlist/verify?token=${verificationToken}&email=${encodeURIComponent(normalizedEmail)}`;
+
 
     try {
       const emailHtml = waitlistVerificationTemplate({

@@ -378,13 +378,14 @@ exports.waitlistVerificationTemplate = ({ name, verifyUrl }) => {
 </html>`;
 };
 
-exports.waitlistWelcomeTemplate = ({ name, waitlistPosition, referralCode, referralLink, signupBonus = 5000, referralReward = 2000 }) => {
+exports.waitlistWelcomeTemplate = ({ name, waitlistPosition, totalWaitlistCount, referralCode, referralLink, signupBonus = 5000, referralReward = 2000 }) => {
+  const formattedTotal = totalWaitlistCount ? Number(totalWaitlistCount).toLocaleString() : waitlistPosition;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to the Hedgenest Waitlist!</title>
+    <title>You’re in. Spot secured! 🎉 - HedgeNest</title>
     <style>
         @media screen and (max-width: 600px) {
             .container { width: 100% !important; border-radius: 0px !important; }
@@ -416,17 +417,20 @@ exports.waitlistWelcomeTemplate = ({ name, waitlistPosition, referralCode, refer
                                     ✓
                                 </div>
                                 <h2 style="margin: 0 0 10px; font-size: 24px; font-weight: 800; color: #0f172a;">
-                                    You’re Officially In! 🎉
+                                    You’re in. Spot secured! 🎉
                                 </h2>
                                 <p style="font-size: 15px; line-height: 1.6; margin: 0 0 28px; color: #64748b;">
-                                    Hi <strong>${name}</strong>, your email is verified and your spot on the Hedgenest waitlist is secured.
+                                    Hi <strong>${name}</strong>, your email is verified and your spot is officially locked in.
                                 </p>
 
                                 <!-- Position Hero Card -->
                                 <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 16px; padding: 28px 20px; color: #ffffff; margin-bottom: 28px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);">
-                                    <p style="margin: 0; color: #ddad0f; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;">Your Waitlist Position</p>
+                                    <p style="margin: 0; color: #ddad0f; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;">Your waitlist position</p>
                                     <h1 style="margin: 8px 0; font-size: 54px; font-weight: 900; color: #ffffff; letter-spacing: -1px;">#${waitlistPosition}</h1>
-                                    <p style="margin: 0; color: #94a3b8; font-size: 13px;">Early access granted in order of position</p>
+                                    <p style="margin: 0 0 12px; color: #94a3b8; font-size: 14px;">Out of <strong>${formattedTotal}</strong> people on the waitlist.</p>
+                                    <p style="margin: 12px 0 0; color: #cbd5e1; font-size: 13px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-style: italic;">
+                                        We’ll reach out when <strong>HedgeNest</strong> is ready for you.
+                                    </p>
                                 </div>
 
                                 <!-- Bonuses Table -->
