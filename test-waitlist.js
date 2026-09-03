@@ -1,7 +1,8 @@
 require('dotenv').config();
 const axios = require('axios');
 
-const BASE_URL = process.env.TEST_URL || `http://localhost:${process.env.PORT || 3333}`;
+const BASE_URL = process.env.TEST_URL || `http://localhost:${process.env.PORT || 8228}`;
+
 const WAITLIST_ENDPOINT = `${BASE_URL}/api/waitlist`;
 
 async function runTests() {

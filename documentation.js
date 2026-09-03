@@ -13,7 +13,7 @@ const options = {
                 description: 'Current host'
             },
             {
-                url: `http://localhost:${process.env.PORT || 3333}`,
+                url: `http://localhost:${process.env.PORT || 8228}`,
                 description: 'Localhost route'
             },
             {
