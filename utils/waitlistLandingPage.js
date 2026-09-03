@@ -1,6 +1,6 @@
 /**
  * Generates an interactive, celebratory HTML landing page with graffiti / confetti animation
- * for users who successfully verify their waitlist email.
+ * in Gold and Navy Blue, adapting automatically to the user's device light/dark theme.
  */
 exports.renderWaitlistSuccessPage = ({
   firstName,
@@ -30,20 +30,109 @@ exports.renderWaitlistSuccessPage = ({
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spot Secured! 🎉 - HedgeNest Waitlist</title>
+  <title>Spot Secured! 🎉 - HedgeNest</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Permanent+Marker&display=swap" rel="stylesheet">
   <style>
+    /* Default Theme: Dark Navy & Radiant Gold */
     :root {
-      --bg: #0b0f19;
-      --card-bg: #111827;
-      --card-border: #1f2937;
+      --bg: #070d1e;
+      --bg-glow: radial-gradient(circle, rgba(221, 173, 15, 0.18) 0%, rgba(10, 25, 47, 0.4) 50%, transparent 70%);
+      --card-bg: rgba(13, 27, 62, 0.94);
+      --card-border: rgba(221, 173, 15, 0.3);
+      --card-shadow: 0 25px 50px -12px rgba(2, 6, 23, 0.85), 0 0 35px rgba(221, 173, 15, 0.12);
+      --header-border: rgba(221, 173, 15, 0.18);
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #cbd5e1;
+      
       --gold: #ddad0f;
-      --gold-hover: #ca8a04;
-      --emerald: #10b981;
-      --text-main: #f9fafb;
-      --text-muted: #9ca3af;
+      --gold-hover: #b48c08;
+      --gold-light: #fef08a;
+      --gold-badge: #facc15;
+      --gold-shadow: 2px 2px 0px #081026, -1px -1px 0px #081026, 3px 3px 10px rgba(221, 173, 15, 0.6);
+      
+      --navy-deep: #070d1e;
+      --navy-card: #0d1b3e;
+      --navy-hero: linear-gradient(145deg, #0f214d 0%, #081026 100%);
+      --hero-border: rgba(221, 173, 15, 0.4);
+      --hero-shadow: 0 14px 30px -5px rgba(0, 0, 0, 0.6), inset 0 0 25px rgba(221, 173, 15, 0.08);
+      --hero-num: #ffffff;
+      --hero-num-glow: 0 0 35px rgba(221, 173, 15, 0.5);
+      
+      --perk-bg: rgba(15, 33, 77, 0.7);
+      --perk-border: rgba(221, 173, 15, 0.2);
+      --perk-val-gold: #facc15;
+      
+      --share-bg: rgba(15, 33, 77, 0.55);
+      --share-border: rgba(221, 173, 15, 0.35);
+      --share-title: #fde047;
+      
+      --input-bg: #070d1e;
+      --input-border: rgba(221, 173, 15, 0.3);
+      --input-text: #f1f5f9;
+      
+      --pill-bg: rgba(221, 173, 15, 0.12);
+      --pill-border: rgba(221, 173, 15, 0.35);
+      --pill-color: #facc15;
+      
+      --footer-text: #64748b;
+      --toast-bg: #1e3a8a;
+      --toast-color: #fef08a;
+      --toast-border: 1px solid rgba(221, 173, 15, 0.5);
+    }
+
+    /* Automatic Light Mode (Device Preference) */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4f7fc;
+        --bg-glow: radial-gradient(circle, rgba(221, 173, 15, 0.22) 0%, rgba(30, 58, 138, 0.08) 50%, transparent 70%);
+        --card-bg: #ffffff;
+        --card-border: rgba(15, 33, 77, 0.14);
+        --card-shadow: 0 20px 45px -10px rgba(10, 25, 47, 0.14), 0 0 25px rgba(221, 173, 15, 0.1);
+        --header-border: rgba(15, 33, 77, 0.08);
+        
+        --text-main: #0a1931;
+        --text-muted: #4b5563;
+        --text-sub: #334155;
+        
+        --gold: #b48c08;
+        --gold-hover: #947104;
+        --gold-light: #fef3c7;
+        --gold-badge: #b45309;
+        --gold-shadow: 2px 2px 0px #0a1931, 3px 3px 6px rgba(180, 83, 9, 0.3);
+        
+        --navy-deep: #0a1931;
+        --navy-card: #f8fafc;
+        --navy-hero: linear-gradient(145deg, #0a1931 0%, #15274d 100%);
+        --hero-border: rgba(212, 175, 55, 0.5);
+        --hero-shadow: 0 14px 28px -6px rgba(10, 25, 47, 0.28), inset 0 0 20px rgba(212, 175, 55, 0.15);
+        --hero-num: #ffffff;
+        --hero-num-glow: 0 0 25px rgba(250, 204, 21, 0.45);
+        
+        --perk-bg: #f8fafc;
+        --perk-border: rgba(15, 33, 77, 0.1);
+        --perk-val-gold: #b48c08;
+        
+        --share-bg: #fffdf5;
+        --share-border: rgba(180, 140, 8, 0.35);
+        --share-title: #92400e;
+        
+        --input-bg: #ffffff;
+        --input-border: rgba(15, 33, 77, 0.22);
+        --input-text: #0a1931;
+        
+        --pill-bg: rgba(10, 25, 49, 0.06);
+        --pill-border: rgba(10, 25, 49, 0.2);
+        --pill-color: #0a1931;
+        
+        --footer-text: #64748b;
+        --toast-bg: #0a1931;
+        --toast-color: #fef08a;
+        --toast-border: 1px solid rgba(212, 175, 55, 0.5);
+      }
     }
 
     * {
@@ -64,6 +153,7 @@ exports.renderWaitlistSuccessPage = ({
       padding: 24px 16px;
       position: relative;
       overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     /* Fullscreen Confetti Canvas */
@@ -77,16 +167,16 @@ exports.renderWaitlistSuccessPage = ({
       z-index: 999;
     }
 
-    /* Ambient Background Glow */
+    /* Ambient Glow */
     .glow-bg {
       position: absolute;
-      width: 450px;
-      height: 450px;
-      background: radial-gradient(circle, rgba(221, 173, 15, 0.15) 0%, rgba(16, 185, 129, 0.08) 50%, transparent 70%);
+      width: 500px;
+      height: 500px;
+      background: var(--bg-glow);
       top: 5%;
       left: 50%;
       transform: translateX(-50%);
-      filter: blur(50px);
+      filter: blur(60px);
       z-index: 1;
       pointer-events: none;
     }
@@ -96,13 +186,14 @@ exports.renderWaitlistSuccessPage = ({
       z-index: 10;
       width: 100%;
       max-width: 540px;
-      background: rgba(17, 24, 39, 0.95);
+      background: var(--card-bg);
       backdrop-filter: blur(12px);
       border: 1px solid var(--card-border);
       border-radius: 24px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(221, 173, 15, 0.1);
+      box-shadow: var(--card-shadow);
       overflow: hidden;
       animation: popIn 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     @keyframes popIn {
@@ -115,7 +206,7 @@ exports.renderWaitlistSuccessPage = ({
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid var(--header-border);
     }
 
     .brand {
@@ -129,9 +220,9 @@ exports.renderWaitlistSuccessPage = ({
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(16, 185, 129, 0.12);
-      color: var(--emerald);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: var(--pill-bg);
+      color: var(--pill-color);
+      border: 1px solid var(--pill-border);
       padding: 5px 12px;
       border-radius: 9999px;
       font-size: 12px;
@@ -145,12 +236,12 @@ exports.renderWaitlistSuccessPage = ({
       text-align: center;
     }
 
-    /* Graffiti Badge */
+    /* Graffiti Banner Badge */
     .graffiti-tag {
       font-family: 'Permanent Marker', cursive;
       font-size: 28px;
-      color: #facc15;
-      text-shadow: 2px 2px 0px #b45309, 0 0 20px rgba(234, 179, 8, 0.5);
+      color: var(--gold-badge);
+      text-shadow: var(--gold-shadow);
       transform: rotate(-3deg);
       display: inline-block;
       margin-bottom: 8px;
@@ -166,7 +257,7 @@ exports.renderWaitlistSuccessPage = ({
     h1 {
       font-size: 28px;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--text-main);
       margin-bottom: 8px;
       line-height: 1.25;
     }
@@ -178,15 +269,15 @@ exports.renderWaitlistSuccessPage = ({
       line-height: 1.5;
     }
 
-    /* Position Hero */
+    /* Position Hero Card (Deep Navy & Polished Gold) */
     .position-hero {
-      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
-      border: 2px solid rgba(221, 173, 15, 0.3);
+      background: var(--navy-hero);
+      border: 2px solid var(--hero-border);
       border-radius: 20px;
       padding: 24px 20px;
       margin-bottom: 24px;
       position: relative;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(221, 173, 15, 0.05);
+      box-shadow: var(--hero-shadow);
     }
 
     .position-label {
@@ -201,11 +292,11 @@ exports.renderWaitlistSuccessPage = ({
     .position-number {
       font-size: 58px;
       font-weight: 900;
-      color: #ffffff;
+      color: var(--hero-num);
       line-height: 1;
       margin: 8px 0;
       letter-spacing: -2px;
-      text-shadow: 0 0 30px rgba(221, 173, 15, 0.4);
+      text-shadow: var(--hero-num-glow);
     }
 
     .position-total {
@@ -219,7 +310,7 @@ exports.renderWaitlistSuccessPage = ({
       color: #cbd5e1;
       margin-top: 10px;
       padding-top: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       font-style: italic;
     }
 
@@ -232,8 +323,8 @@ exports.renderWaitlistSuccessPage = ({
     }
 
     .perk-card {
-      background: rgba(31, 41, 55, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--perk-bg);
+      border: 1px solid var(--perk-border);
       border-radius: 14px;
       padding: 14px;
       text-align: center;
@@ -250,17 +341,14 @@ exports.renderWaitlistSuccessPage = ({
     .perk-val {
       font-size: 18px;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--perk-val-gold);
       margin-top: 4px;
     }
 
-    .perk-val.gold { color: var(--gold); }
-    .perk-val.emerald { color: var(--emerald); }
-
     /* Referral Share Section */
     .share-box {
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px dashed rgba(221, 173, 15, 0.4);
+      background: var(--share-bg);
+      border: 1px dashed var(--share-border);
       border-radius: 18px;
       padding: 20px;
       text-align: left;
@@ -270,7 +358,7 @@ exports.renderWaitlistSuccessPage = ({
     .share-title {
       font-size: 15px;
       font-weight: 700;
-      color: #fbbf24;
+      color: var(--share-title);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -279,7 +367,7 @@ exports.renderWaitlistSuccessPage = ({
 
     .share-desc {
       font-size: 13px;
-      color: #cbd5e1;
+      color: var(--text-sub);
       line-height: 1.45;
       margin-bottom: 14px;
     }
@@ -292,9 +380,9 @@ exports.renderWaitlistSuccessPage = ({
 
     .referral-input {
       flex: 1;
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: #e2e8f0;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--input-text);
       padding: 12px 14px;
       border-radius: 10px;
       font-size: 13px;
@@ -304,7 +392,7 @@ exports.renderWaitlistSuccessPage = ({
 
     .copy-btn {
       background: var(--gold);
-      color: #111827;
+      color: #070d1e;
       border: none;
       border-radius: 10px;
       padding: 0 18px;
@@ -342,14 +430,14 @@ exports.renderWaitlistSuccessPage = ({
       transition: opacity 0.2s;
     }
 
-    .social-btn:hover { opacity: 0.85; }
+    .social-btn:hover { opacity: 0.88; }
     .social-whatsapp { background: #25d366; color: #ffffff; }
     .social-twitter { background: #1d9bf0; color: #ffffff; }
     .social-telegram { background: #0088cc; color: #ffffff; }
 
     .footer-note {
       font-size: 12px;
-      color: #64748b;
+      color: var(--footer-text);
       margin-top: 16px;
     }
 
@@ -357,13 +445,14 @@ exports.renderWaitlistSuccessPage = ({
     .toast {
       position: fixed;
       bottom: 24px;
-      background: #10b981;
-      color: #ffffff;
+      background: var(--toast-bg);
+      color: var(--toast-color);
+      border: var(--toast-border);
       padding: 10px 20px;
       border-radius: 9999px;
       font-size: 14px;
       font-weight: 700;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       opacity: 0;
       transform: translateY(20px);
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -392,7 +481,7 @@ exports.renderWaitlistSuccessPage = ({
       <h1>You’re in. Spot secured! 🎉</h1>
       <p class="subtitle">Hi <strong>${firstName}</strong>, your email has been verified. You're officially on the HedgeNest waitlist!</p>
 
-      <!-- Position Card -->
+      <!-- Position Hero Card -->
       <div class="position-hero">
         <p class="position-label">Your Waitlist Position</p>
         <div class="position-number">#${waitlistPosition}</div>
@@ -400,15 +489,15 @@ exports.renderWaitlistSuccessPage = ({
         <p class="reach-out-note">We’ll reach out when HedgeNest is ready for you.</p>
       </div>
 
-      <!-- Perks Grid -->
+      <!-- Financial Perks Grid -->
       <div class="perks-grid">
         <div class="perk-card">
           <div class="perk-label">🎁 Signup Bonus</div>
-          <div class="perk-val emerald">₦${formattedBonus}</div>
+          <div class="perk-val">₦${formattedBonus}</div>
         </div>
         <div class="perk-card">
           <div class="perk-label">🤝 Referral Reward</div>
-          <div class="perk-val gold">₦${formattedReward} <span style="font-size: 11px; font-weight: 400; color: #9ca3af;">/ friend</span></div>
+          <div class="perk-val">₦${formattedReward} <span style="font-size: 11px; font-weight: 400; color: var(--text-muted);">/ friend</span></div>
         </div>
       </div>
 
@@ -455,7 +544,7 @@ exports.renderWaitlistSuccessPage = ({
       });
     }
 
-    // Graffiti / Confetti Animation Engine
+    // Graffiti / Confetti Animation Engine (Navy Blue & Gold)
     (function () {
       const canvas = document.getElementById('confettiCanvas');
       const ctx = canvas.getContext('2d');
@@ -471,7 +560,19 @@ exports.renderWaitlistSuccessPage = ({
         canvas.height = height;
       });
 
-      const colors = ['#ddad0f', '#facc15', '#10b981', '#34d399', '#6366f1', '#ec4899', '#f97316', '#38bdf8'];
+      // Gold and Navy Blue palette with luminous accents
+      const colors = [
+        '#ddad0f', // Classic Gold
+        '#facc15', // Bright Gold
+        '#fbbf24', // Amber Gold
+        '#b48c08', // Deep Antique Gold
+        '#0a1931', // Deep Navy Blue
+        '#1e3a8a', // Royal Navy Blue
+        '#2563eb', // Vivid Blue
+        '#3b82f6', // Sky Blue
+        '#ffffff'  // Metallic Sparkle
+      ];
+
       const particles = [];
       const particleCount = 140;
 
@@ -559,25 +660,44 @@ exports.renderWaitlistErrorPage = ({ message }) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Verification Error - HedgeNest</title>
   <style>
+    :root {
+      --bg: #070d1e;
+      --card-bg: #0d1b3e;
+      --card-border: rgba(221, 173, 15, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --gold: #ddad0f;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4f7fc;
+        --card-bg: #ffffff;
+        --card-border: rgba(15, 33, 77, 0.14);
+        --text-main: #0a1931;
+        --text-muted: #4b5563;
+        --gold: #b48c08;
+      }
+    }
     body {
-      background-color: #0b0f19;
-      color: #f9fafb;
+      background-color: var(--bg);
+      color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      transition: background-color 0.3s ease;
     }
     .card {
-      background: #111827;
-      border: 1px solid #1f2937;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 20px;
       max-width: 460px;
       width: 100%;
       padding: 40px 30px;
       text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
     }
     .icon {
       font-size: 48px;
@@ -589,21 +709,23 @@ exports.renderWaitlistErrorPage = ({ message }) => {
       margin-bottom: 12px;
     }
     p {
-      color: #9ca3af;
+      color: var(--text-muted);
       font-size: 15px;
       line-height: 1.5;
       margin-bottom: 24px;
     }
     .btn {
       display: inline-block;
-      background: #ddad0f;
-      color: #111827;
+      background: var(--gold);
+      color: #070d1e;
       text-decoration: none;
       padding: 12px 24px;
       border-radius: 10px;
       font-weight: 700;
       font-size: 14px;
+      transition: opacity 0.2s;
     }
+    .btn:hover { opacity: 0.9; }
   </style>
 </head>
 <body>
