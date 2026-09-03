@@ -61,6 +61,10 @@ exports.renderWaitlistSuccessPage = ({
       --hero-shadow: 0 14px 30px -5px rgba(0, 0, 0, 0.6), inset 0 0 25px rgba(221, 173, 15, 0.08);
       --hero-num: #ffffff;
       --hero-num-glow: 0 0 35px rgba(221, 173, 15, 0.5);
+      --hero-total: #94a3b8;
+      --hero-total-strong: #ffffff;
+      --hero-note: #cbd5e1;
+      --hero-note-border: rgba(255, 255, 255, 0.1);
       
       --perk-bg: rgba(15, 33, 77, 0.7);
       --perk-border: rgba(221, 173, 15, 0.2);
@@ -106,11 +110,15 @@ exports.renderWaitlistSuccessPage = ({
         
         --navy-deep: #0a1931;
         --navy-card: #f8fafc;
-        --navy-hero: linear-gradient(145deg, #0a1931 0%, #15274d 100%);
-        --hero-border: rgba(212, 175, 55, 0.5);
-        --hero-shadow: 0 14px 28px -6px rgba(10, 25, 47, 0.28), inset 0 0 20px rgba(212, 175, 55, 0.15);
-        --hero-num: #ffffff;
-        --hero-num-glow: 0 0 25px rgba(250, 204, 21, 0.45);
+        --navy-hero: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        --hero-border: rgba(180, 140, 8, 0.4);
+        --hero-shadow: 0 10px 25px -5px rgba(10, 25, 47, 0.08), 0 0 20px rgba(221, 173, 15, 0.08);
+        --hero-num: #0a1931;
+        --hero-num-glow: 0 2px 8px rgba(10, 25, 49, 0.12);
+        --hero-total: #475569;
+        --hero-total-strong: #0a1931;
+        --hero-note: #334155;
+        --hero-note-border: rgba(15, 33, 77, 0.1);
         
         --perk-bg: #f8fafc;
         --perk-border: rgba(15, 33, 77, 0.1);
@@ -301,16 +309,20 @@ exports.renderWaitlistSuccessPage = ({
 
     .position-total {
       font-size: 14px;
-      color: #94a3b8;
+      color: var(--hero-total);
       font-weight: 500;
+    }
+
+    .position-total strong {
+      color: var(--hero-total-strong);
     }
 
     .reach-out-note {
       font-size: 13px;
-      color: #cbd5e1;
+      color: var(--hero-note);
       margin-top: 10px;
       padding-top: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid var(--hero-note-border);
       font-style: italic;
     }
 
