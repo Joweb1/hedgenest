@@ -64,18 +64,25 @@ paths:
                       referralLink:
                         type: string
                         example: https://hedge-nest.vercel.app/waitlist?ref=HN-8F2A1C
+                      verifyUrl:
+                        type: string
+                        example: http://localhost:3333/api/v1/waitlist/verify?token=5b4776d1e4b46277...
                       referralReward:
                         type: number
                         example: 2000
                       isVerified:
                         type: boolean
                         example: false
+                      verificationToken:
+                        type: string
+                        example: 5b4776d1e4b4627708cee40f6a0756fceaff83617cbaada242273717391563b5
         "400":
           description: Validation error or duplicate email
 
   /api/v1/waitlist/verify:
     get:
-      summary: Verify waitlist email via link
+      summary: Verify waitlist email & view celebration landing page
+      description: When clicked from the verification email, this endpoint marks the user as verified, calculates their waitlist ranking, dispatches the spot secured congratulations email, and renders an interactive HTML landing page featuring confetti/graffiti animations and viral share buttons.
       tags: [waitlist]
       parameters:
         - in: query
@@ -91,9 +98,25 @@ paths:
             type: string
       responses:
         "200":
-          description: Email verified successfully and spot confirmed
+          description: Email verified successfully. Returns the celebration HTML landing page (or JSON if requested by API client).
+          content:
+            text/html:
+              schema:
+                type: string
+                description: Responsive HTML page with confetti/graffiti animation and waitlist ranking
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Email verified successfully! Your waitlist spot is secured.
         "400":
           description: Invalid or expired verification token
+
 
     post:
       summary: Verify waitlist email via API
