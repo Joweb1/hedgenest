@@ -18,6 +18,7 @@ const revenueModel = require("../model/revenue");
 const investmentModel = require("../model/investment");
 const smartSaveModel = require("../model/smartSave");
 const walletModel = require("../model/wallet");
+const { waitlistModel } = require("../model/waitlist");
 
 exports.createAdmin = async (req, res) => {
   try {
@@ -446,3 +447,74 @@ exports.getAllConversion = async (req, res) => {
     });
   }
 };
+
+exports.getAllWaitlist = async (req, res) => {
+  try {
+    const { status, search, page, limit } = req.query;
+
+    const filter = {};
+
+    if (status) {
+      if (status === "verified") {
+        filter.isVerified = true;
+      } else if (status === "pending") {
+        filter.isVerified = false;
+      } else {
+        filter.status = status;
+      }
+    }
+
+    if (search) {
+      const searchRegex = new RegExp(search.trim(), "i");
+      filter.$or = [
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+        { email: searchRegex },
+        { referralCode: searchRegex },
+      ];
+    }
+
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = parseInt(limit, 10);
+    const skip = limitNum ? (pageNum - 1) * limitNum : 0;
+
+    let query = waitlistModel.find(filter).sort({ createdAt: -1 });
+
+    if (limitNum) {
+      query = query.skip(skip).limit(limitNum);
+    }
+
+    const waitlist = await query;
+    const totalCount = await waitlistModel.countDocuments(filter);
+    const totalAll = await waitlistModel.countDocuments();
+    const totalVerified = await waitlistModel.countDocuments({ isVerified: true });
+    const totalPending = await waitlistModel.countDocuments({ isVerified: false });
+
+    return res.status(200).json({
+      success: true,
+      message: "All waitlist users retrieved successfully",
+      stats: {
+        totalRegistrations: totalAll,
+        verifiedUsers: totalVerified,
+        pendingVerification: totalPending,
+      },
+      pagination: limitNum
+        ? {
+            page: pageNum,
+            limit: limitNum,
+            totalPages: Math.ceil(totalCount / limitNum),
+            totalRecords: totalCount,
+          }
+        : undefined,
+      count: waitlist.length,
+      waitlist,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error retrieving waitlist users",
+      error: error.message,
+    });
+  }
+};
+

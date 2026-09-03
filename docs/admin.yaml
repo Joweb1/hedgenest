@@ -260,3 +260,44 @@ paths:
           description: All Conversion Found
         "400":
           description: something went wrong
+
+  /api/v1/get-all-waitlist:
+    get:
+      summary: Retrieve all registered waitlist users from the database
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [verified, pending, active, approved]
+          description: Filter waitlist entries by verification status
+        - in: query
+          name: search
+          required: false
+          schema:
+            type: string
+          description: Search by name, email, or referral code
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Waitlist entries retrieved successfully
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - Admin access required
+        "500":
+          description: Server error
