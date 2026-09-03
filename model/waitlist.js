@@ -65,7 +65,28 @@ const waitlistSchema = new mongoose.Schema(
     status: {
       type: String,
       default: "pending",
-      enum: ["pending", "approved", "active"],
+      enum: ["pending", "verified", "approved", "active"],
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    verificationExpires: {
+      type: Date,
+      default: null,
+    },
+    waitlistPosition: {
+      type: Number,
+      default: null,
+    },
+    verifiedAt: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }

@@ -728,3 +728,56 @@ exports.waitlistValidator = (req, res, next) => {
   next();
 };
 
+exports.verifyWaitlistValidator = (req, res, next) => {
+  const schema = joi
+    .object({
+      token: joi.string().trim().optional().messages({
+        "string.empty": "Verification token cannot be empty",
+      }),
+      email: joi.string().trim().email().optional().messages({
+        "string.email": "Email must be a valid email",
+      }),
+    })
+    .or("token", "email")
+    .messages({
+      "object.missing": "Verification token or email is required",
+    });
+
+  const payload = req.method === "GET" ? req.query : req.body;
+  const { error, value } = schema.validate(payload);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
+  if (req.method === "GET") {
+    req.query = value;
+  } else {
+    req.body = value;
+  }
+  next();
+};
+
+
+exports.resendWaitlistValidator = (req, res, next) => {
+  const schema = joi.object({
+    email: joi.string().trim().email().required().messages({
+      "any.required": "Email is required",
+      "string.empty": "Email cannot be empty",
+      "string.email": "Email must be a valid email",
+    }),
+  });
+
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
+  req.body = value;
+  next();
+};
+
+

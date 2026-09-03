@@ -108,9 +108,73 @@ async function runTests() {
     }
   }
 
+  // Test 5: Verify Waitlist Email
+  console.log(`🔹 Test 5: Verifying waitlist email with token...`);
+  try {
+    const signupRes = await axios.post(WAITLIST_ENDPOINT, {
+      firstName: "Chidi",
+      lastName: "Okafor",
+      email: `chidi.${Date.now()}@example.com`,
+      amountRange: "5000-100000-annually",
+    });
+
+    const token = signupRes.data.data.verificationToken;
+    console.log(`Generated Token: ${token}`);
+
+    const verifyRes = await axios.post(`${BASE_URL}/api/v1/waitlist/verify`, {
+      token,
+    });
+
+    console.log(`✅ Status: ${verifyRes.status}`);
+    console.log(`📦 Verification Response:`, JSON.stringify(verifyRes.data, null, 2));
+
+    if (
+      verifyRes.data.success === true &&
+      verifyRes.data.data.isVerified === true &&
+      typeof verifyRes.data.data.waitlistPosition === "number"
+    ) {
+      console.log(
+        `✅ Test 5 PASSED: Email successfully verified! Waitlist Position: #${verifyRes.data.data.waitlistPosition}\n`
+      );
+    } else {
+      console.error(`❌ Test 5 FAILED: Expected verified status and waitlistPosition\n`);
+    }
+  } catch (error) {
+    console.error(`❌ Test 5 FAILED:`, error.response?.data || error.message);
+  }
+
+  // Test 6: Resend Verification Email
+  console.log(`🔹 Test 6: Resending verification email...`);
+  try {
+    const unverifiedEmail = `unverified.${Date.now()}@example.com`;
+    await axios.post(WAITLIST_ENDPOINT, {
+      firstName: "Emeka",
+      lastName: "Nnamdi",
+      email: unverifiedEmail,
+      amountRange: "5000-100000-annually",
+    });
+
+    const resendRes = await axios.post(
+      `${BASE_URL}/api/v1/waitlist/resend-verification`,
+      { email: unverifiedEmail }
+    );
+
+    console.log(`✅ Status: ${resendRes.status}`);
+    console.log(`📦 Resend Response:`, JSON.stringify(resendRes.data, null, 2));
+
+    if (resendRes.data.success === true && resendRes.data.data.verificationToken) {
+      console.log(`✅ Test 6 PASSED: Verification email resent successfully!\n`);
+    } else {
+      console.error(`❌ Test 6 FAILED\n`);
+    }
+  } catch (error) {
+    console.error(`❌ Test 6 FAILED:`, error.response?.data || error.message);
+  }
+
   console.log(`==============================================`);
   console.log(`🎉 All test scenarios finished!`);
   console.log(`==============================================\n`);
 }
 
 runTests();
+
