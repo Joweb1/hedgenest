@@ -3,7 +3,8 @@ const axios = require('axios');
 
 const BASE_URL = process.env.TEST_URL || `http://localhost:${process.env.PORT || 8228}`;
 
-const WAITLIST_ENDPOINT = `${BASE_URL}/api/waitlist`;
+const WAITLIST_ENDPOINT = `${BASE_URL}/api/v1/waitlist`;
+
 
 async function runTests() {
   console.log(`\n==============================================`);

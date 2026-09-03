@@ -40,8 +40,8 @@ app.use('/api/v1/investmentPlan', investmentPlanRouter)
 app.use('/api/v1', investmentRouter)
 app.use('/api/v1', smartSaveRouter)
 app.use('/api/v1', percentageRouter)
-app.use('/api', waitlistRouter)
 app.use('/api/v1', waitlistRouter)
+
 
 app.use((err, req, res, next) => {
   if (err && (err.type === 'entity.parse.failed' || err instanceof SyntaxError)) {
