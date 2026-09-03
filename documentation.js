@@ -9,12 +9,16 @@ const options = {
         },
         servers:[
             {
-                url: "https://hedgenest.onrender.com",
-                description: 'The hosted route'
+                url: "/",
+                description: 'Current host'
             },
             {
-                url: "http://localhost:8228",
-                description: 'Localhost route '
+                url: `http://localhost:${process.env.PORT || 3333}`,
+                description: 'Localhost route'
+            },
+            {
+                url: "https://hedgenest.onrender.com",
+                description: 'The hosted route'
             },
         ],
         components: {
