@@ -1,55 +1,68 @@
 const passport = require('passport');
 const crypto = require('crypto');
-const user = require('../model/user');
-const GoogleStrategy = require ('passport-google-oauth20').Strategy
-passport.use(new GoogleStrategy({
-    clientID: process.env.Google_Client_ID,
-    clientSecret:process.env.Google_Client_Secret,
-    callbackURL: process.env.callbackURL
-  },
-  async (accessToken, refreshToken, profile, cb)=> {
-    try {
-        //check if the user is already signed up
-         let user = await user.findOne({ email: profile._json.email})
-         //if not signed up create a new account for the user using the details gotten from google
-         if(!user){
-            user = new user({
-                firstName:profile._json.given_name,
-                lastName:profile._json.family_name,
-                phoneNumber:`${Math.floor(Math.random() * 1E11)}`,
-                email:profile._json.email,
-                password: crypto.randomBytes(32).toString('hex'),
-                isVerified:profile._json.email_verified,
-                profilePicture: {
-                  url: profile._json.picture
-                }
-            })
+const userModel = require('../model/user');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-            await user.save()
-         }
-         return cb(null,user)
+const googleClientId = process.env.Google_Client_ID || process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.Google_Client_Secret || process.env.GOOGLE_CLIENT_SECRET;
+const callbackURL = process.env.callbackURL || process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3333/api/v1/auth/google/callback';
 
-    } catch (error) {
-        console.log(error)
-        return cb(error)
-    }
-  }
-));
+let profile = (req, res, next) => next();
+let loginProfile = (req, res, next) => next();
 
-passport.serializeUser((user, done)=> {
+if (googleClientId && googleClientSecret) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: googleClientId,
+        clientSecret: googleClientSecret,
+        callbackURL: callbackURL,
+      },
+      async (accessToken, refreshToken, profileData, cb) => {
+        try {
+          let foundUser = await userModel.findOne({ email: profileData._json.email });
+          if (!foundUser) {
+            foundUser = new userModel({
+              firstName: profileData._json.given_name,
+              lastName: profileData._json.family_name,
+              phoneNumber: `${Math.floor(Math.random() * 1e11)}`,
+              email: profileData._json.email,
+              password: crypto.randomBytes(32).toString('hex'),
+              isVerified: profileData._json.email_verified,
+              profilePicture: {
+                url: profileData._json.picture,
+              },
+            });
+
+            await foundUser.save();
+          }
+          return cb(null, foundUser);
+        } catch (error) {
+          console.log(error);
+          return cb(error);
+        }
+      }
+    )
+  );
+
+  profile = passport.authenticate('google', { scope: ['profile', 'email'] });
+  loginProfile = passport.authenticate('google', { failureRedirect: '/login' });
+}
+
+passport.serializeUser((user, done) => {
   done(null, user.id);
-})
+});
 
-passport.deserializeUser(async(id, done)=> {
-  const user = await user.findById(id)
-    if(!user){
-        return done(new Error('User not found'), null)
+passport.deserializeUser(async (id, done) => {
+  try {
+    const foundUser = await userModel.findById(id);
+    if (!foundUser) {
+      return done(new Error('User not found'), null);
     }
-    done(null, user);
-  });
-  const profile = passport.authenticate('google',{ scope: ['profile', 'email']})
+    done(null, foundUser);
+  } catch (error) {
+    done(error, null);
+  }
+});
 
-  const loginProfile = passport.authenticate('google',{ failureRedirect: '/login'})
-  
-
-  module.exports = {passport, profile,loginProfile}
+module.exports = { passport, profile, loginProfile };
