@@ -324,7 +324,7 @@ exports.verifyWaitlistEmail = async (req, res) => {
 
       await sendEmail(
         waitlistUser.email,
-        `You’re in. Spot secured! 🎉 (#${position})`,
+        `You’re in. Spot secured! (#${position})`,
         welcomeHtml
       );
     } catch (mailError) {
