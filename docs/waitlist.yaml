@@ -64,7 +64,7 @@ paths:
                         example: HN-8F2A1C
                       referralLink:
                         type: string
-                        example: https://hedge-nest.vercel.app/waitlist?ref=HN-8F2A1C
+                        example: https://hedgenestwaitlist.vercel.app/?ref=HN-8F2A1C
                       verifyUrl:
                         type: string
                         example: https://hedgenestwaitlist.vercel.app/?token=5b4776d1e4b46277...&email=adaeze%40gmail.com
@@ -176,7 +176,7 @@ paths:
                         example: HN-8F2A1C
                       referralLink:
                         type: string
-                        example: https://hedge-nest.vercel.app/waitlist?ref=HN-8F2A1C
+                        example: https://hedgenestwaitlist.vercel.app/?ref=HN-8F2A1C
                       referralReward:
                         type: string
                         example: 1 USDT
