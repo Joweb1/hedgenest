@@ -38,10 +38,14 @@ const getFrontendVerifyUrl = (token, email) => {
     process.env.FRONTEND_VERIFY_URL ||
     process.env.FRONTEND_URL ||
     process.env.CLIENT_URL ||
-    "http://localhost:5173/"
+    "https://hedge-nest.vercel.app"
   ).trim();
 
-  const cleanBase = baseUrl.replace(/\/+$/, "");
+  const finalBase = baseUrl.includes("localhost")
+    ? "https://hedge-nest.vercel.app"
+    : baseUrl;
+
+  const cleanBase = finalBase.replace(/\/+$/, "");
   const urlPath = cleanBase.split("/").length > 3 ? cleanBase : `${cleanBase}/`;
   const separator = urlPath.includes("?") ? "&" : "?";
   return `${urlPath}${separator}token=${token}&email=${encodeURIComponent(email)}`;
