@@ -138,7 +138,7 @@ exports.joinWaitlist = async (req, res) => {
       });
       await sendEmail(
         waitlistUser.email,
-        "You’re almost in - Verify your Hedgenest waitlist spot",
+        "You’re almost in - Verify your HedgeNest waitlist spot",
         emailHtml
       );
     } catch (mailError) {
@@ -413,7 +413,7 @@ exports.resendVerificationEmail = async (req, res) => {
       });
       await sendEmail(
         waitlistUser.email,
-        "You’re almost in - Verify your Hedgenest waitlist spot",
+        "You’re almost in - Verify your HedgeNest waitlist spot",
         emailHtml
       );
     } catch (mailError) {
