@@ -494,7 +494,7 @@ exports.waitlistVerificationTemplate = ({ name, verifyUrl }) => {
     <!-- Expiry Guidance -->
     <div style="background-color: #f8fafc; border-left: 3px solid #ddad0f; border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 0 0 20px;">
       <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">
-        This verification link is valid for <strong>24 hours</strong>. If you did not sign up for the HedgeNest waitlist, you can safely ignore this email.
+        This verification link is valid for <strong>15 minutes</strong>. If you did not sign up for the HedgeNest waitlist, you can safely ignore this email.
       </p>
     </div>
   `;
