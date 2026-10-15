@@ -19,36 +19,29 @@ const getBackendUrl = (req) => {
   return "http://localhost:3333";
 };
 
-const getFrontendUrl = () => {
-  return (
-    process.env.CLIENT_URL ||
-    process.env.FRONTEND_URL ||
-    "https://hedge-nest.vercel.app"
-  ).replace(/\/+$/, "");
+const getWaitlistFrontendUrl = () => {
+  const url = (
+    process.env.WAITLIST_FRONTEND_URL ||
+    process.env.FRONTEND_VERIFY_URL ||
+    "https://hedgenestwaitlist.vercel.app"
+  ).trim();
+
+  const finalUrl =
+    url.includes("localhost") || url.includes("hedge-nest.vercel.app")
+      ? "https://hedgenestwaitlist.vercel.app"
+      : url;
+
+  return finalUrl.replace(/\/+$/, "");
 };
 
 const getFrontendReferralLink = (referralCode) => {
-  const base = getFrontendUrl();
-  const waitlistPath = base.endsWith("/waitlist") ? base : `${base}/waitlist`;
-  return `${waitlistPath}?ref=${referralCode}`;
+  const base = getWaitlistFrontendUrl();
+  return `${base}/?ref=${referralCode}`;
 };
 
 const getFrontendVerifyUrl = (token, email) => {
-  const baseUrl = (
-    process.env.FRONTEND_VERIFY_URL ||
-    process.env.FRONTEND_URL ||
-    process.env.CLIENT_URL ||
-    "https://hedge-nest.vercel.app"
-  ).trim();
-
-  const finalBase = baseUrl.includes("localhost")
-    ? "https://hedge-nest.vercel.app"
-    : baseUrl;
-
-  const cleanBase = finalBase.replace(/\/+$/, "");
-  const urlPath = cleanBase.split("/").length > 3 ? cleanBase : `${cleanBase}/`;
-  const separator = urlPath.includes("?") ? "&" : "?";
-  return `${urlPath}${separator}token=${token}&email=${encodeURIComponent(email)}`;
+  const base = getWaitlistFrontendUrl();
+  return `${base}/?token=${token}&email=${encodeURIComponent(email)}`;
 };
 
 const generateReferralCode = async () => {
@@ -145,7 +138,7 @@ exports.joinWaitlist = async (req, res) => {
       });
       await sendEmail(
         waitlistUser.email,
-        "You’re almost in - Verify your Hedgenest waitlist spot",
+        "You’re almost in - Verify your HedgeNest waitlist spot",
         emailHtml
       );
     } catch (mailError) {
@@ -420,7 +413,7 @@ exports.resendVerificationEmail = async (req, res) => {
       });
       await sendEmail(
         waitlistUser.email,
-        "You’re almost in - Verify your Hedgenest waitlist spot",
+        "You’re almost in - Verify your HedgeNest waitlist spot",
         emailHtml
       );
     } catch (mailError) {

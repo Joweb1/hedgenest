@@ -12,9 +12,14 @@ const getBrandConfig = () => {
     "https://hedge-nest.vercel.app"
   ).replace(/\/+$/, "");
 
-  const logoUrl =
+  const logoUrlLight =
+    process.env.APP_LOGO_LIGHT_URL ||
     process.env.APP_LOGO_URL ||
     "https://hedge-nest.vercel.app/assets/Hedge-DBj5Zem1.png";
+
+  const logoUrlDark =
+    process.env.APP_LOGO_DARK_URL ||
+    "https://hedge-nest.vercel.app/assets/white%20logo-DNTDPlZ9.png";
 
   const supportEmail =
     process.env.BREVO_SENDER_EMAIL || "support@hedgenest.com";
@@ -22,7 +27,8 @@ const getBrandConfig = () => {
   return {
     brandName: "HedgeNest",
     frontendUrl,
-    logoUrl,
+    logoUrlLight,
+    logoUrlDark,
     supportEmail,
     helpUrl: `${frontendUrl}/contact`,
     termsUrl: `${frontendUrl}/policy`,
@@ -30,24 +36,24 @@ const getBrandConfig = () => {
     loginUrl: `${frontendUrl}/login`,
     socials: {
       x: {
-        url: "https://x.com",
+        url: "https://x.com/HedgeNest",
         icon: "https://img.icons8.com/ios-filled/50/94a3b8/twitterx--v1.png",
         alt: "X (Twitter)",
       },
       facebook: {
-        url: "https://facebook.com",
+        url: "https://www.facebook.com/profile.php?id=61594261858810",
         icon: "https://img.icons8.com/ios-filled/50/94a3b8/facebook-new.png",
         alt: "Facebook",
       },
-      instagram: {
-        url: "https://instagram.com",
-        icon: "https://img.icons8.com/ios-filled/50/94a3b8/instagram-new.png",
-        alt: "Instagram",
-      },
       linkedin: {
-        url: "https://linkedin.com",
+        url: "https://www.linkedin.com/company/hedge-nest/",
         icon: "https://img.icons8.com/ios-filled/50/94a3b8/linkedin.png",
         alt: "LinkedIn",
+      },
+      whatsapp: {
+        url: "https://whatsapp.com/channel/0029Vb8WxvMKbYMVa0dihi2A",
+        icon: "https://img.icons8.com/ios-filled/50/94a3b8/whatsapp--v1.png",
+        alt: "WhatsApp Channel",
       },
     },
   };
@@ -59,7 +65,8 @@ const getBrandConfig = () => {
 const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
   const {
     brandName,
-    logoUrl,
+    logoUrlLight,
+    logoUrlDark,
     frontendUrl,
     supportEmail,
     helpUrl,
@@ -80,6 +87,11 @@ const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
     body { margin: 0; padding: 0; width: 100% !important; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; }
+    @media (prefers-color-scheme: dark) {
+      .header-brand-cell { background-color: #070d1e !important; border-bottom: 1px solid #1e293b !important; }
+      .light-logo { display: none !important; }
+      .dark-logo { display: block !important; }
+    }
     @media screen and (max-width: 600px) {
       .container { width: 100% !important; border-radius: 0 !important; }
       .content-cell { padding: 28px 20px !important; }
@@ -99,11 +111,14 @@ const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
     <!-- Container Card -->
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="container" style="max-width: 540px; background-color: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06); border: 1px solid #e2e8f0;">
       
-      <!-- Header with HedgeNest Logo -->
+      <!-- Header with HedgeNest Logo (Light & Dark Mode) -->
       <tr>
-        <td align="center" style="padding: 28px 24px; background-color: #ffffff; border-bottom: 1px solid #f1f5f9;">
+        <td align="center" class="header-brand-cell" style="padding: 28px 24px; background-color: #ffffff; border-bottom: 1px solid #f1f5f9;">
           <a href="${frontendUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
-            <img src="${logoUrl}" alt="${brandName}" width="145" height="32" style="display: block; width: 145px; max-width: 145px; height: auto; border: 0;" />
+            <img src="${logoUrlLight}" class="light-logo" alt="${brandName}" width="145" height="32" style="display: block; width: 145px; max-width: 145px; height: auto; border: 0;" />
+            <!--[if !mso]><!-->
+            <img src="${logoUrlDark}" class="dark-logo" alt="${brandName}" width="145" height="32" style="display: none; width: 145px; max-width: 145px; height: auto; border: 0;" />
+            <!--<![endif]-->
           </a>
         </td>
       </tr>
@@ -123,23 +138,23 @@ const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
           <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
             <tr>
               <td style="padding: 0 8px;">
-                <a href="${socials.x.url}" target="_blank" title="X (Twitter)" style="display: inline-block; width: 32px; height: 32px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 32px;">
-                  <img src="${socials.x.icon}" alt="X" width="16" height="16" style="vertical-align: middle; margin-top: 8px;" />
+                <a href="${socials.x.url}" target="_blank" title="X (Twitter)" style="display: inline-block; width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 34px;">
+                  <img src="${socials.x.icon}" alt="X" width="16" height="16" style="vertical-align: middle; margin-top: 9px;" />
                 </a>
               </td>
               <td style="padding: 0 8px;">
-                <a href="${socials.facebook.url}" target="_blank" title="Facebook" style="display: inline-block; width: 32px; height: 32px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 32px;">
-                  <img src="${socials.facebook.icon}" alt="Facebook" width="16" height="16" style="vertical-align: middle; margin-top: 8px;" />
+                <a href="${socials.facebook.url}" target="_blank" title="Facebook" style="display: inline-block; width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 34px;">
+                  <img src="${socials.facebook.icon}" alt="Facebook" width="16" height="16" style="vertical-align: middle; margin-top: 9px;" />
                 </a>
               </td>
               <td style="padding: 0 8px;">
-                <a href="${socials.instagram.url}" target="_blank" title="Instagram" style="display: inline-block; width: 32px; height: 32px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 32px;">
-                  <img src="${socials.instagram.icon}" alt="Instagram" width="16" height="16" style="vertical-align: middle; margin-top: 8px;" />
+                <a href="${socials.linkedin.url}" target="_blank" title="LinkedIn" style="display: inline-block; width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 34px;">
+                  <img src="${socials.linkedin.icon}" alt="LinkedIn" width="16" height="16" style="vertical-align: middle; margin-top: 9px;" />
                 </a>
               </td>
               <td style="padding: 0 8px;">
-                <a href="${socials.linkedin.url}" target="_blank" title="LinkedIn" style="display: inline-block; width: 32px; height: 32px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 32px;">
-                  <img src="${socials.linkedin.icon}" alt="LinkedIn" width="16" height="16" style="vertical-align: middle; margin-top: 8px;" />
+                <a href="${socials.whatsapp.url}" target="_blank" title="WhatsApp Channel" style="display: inline-block; width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 34px;">
+                  <img src="${socials.whatsapp.icon}" alt="WhatsApp" width="16" height="16" style="vertical-align: middle; margin-top: 9px;" />
                 </a>
               </td>
             </tr>
@@ -532,7 +547,7 @@ exports.waitlistWelcomeTemplate = ({
     </h1>
 
     <p style="font-size: 15px; line-height: 1.6; margin: 0 0 28px; color: #64748b; text-align: center;">
-      Hello <strong>${name}</strong>, your email has been verified and your place on the waitlist is officially locked in.
+      Hello <strong>${name}</strong>, your email has been verified and your place on the HedgeNest waitlist is officially locked in.
     </p>
 
     <!-- Hero Card: Waitlist Position -->
@@ -547,7 +562,7 @@ exports.waitlistWelcomeTemplate = ({
         Out of <strong style="color: #ffffff;">${formattedTotal}</strong> registered members
       </p>
       <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; font-size: 12px; font-style: italic;">
-        Priority onboarding starts soon. We will notify you as soon as access opens.
+        Priority onboarding starts soon. We’ll reach out when <strong>HedgeNest</strong> is ready for you.
       </div>
     </div>
 
@@ -579,7 +594,7 @@ exports.waitlistWelcomeTemplate = ({
 
     <!-- Closing Note -->
     <p style="font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 0; text-align: center;">
-      Keep an eye on your inbox for our next update, product walkthroughs, and early launch invitations.
+      Keep an eye on your inbox for our next HedgeNest update, product walkthroughs, and early launch invitations.
     </p>
   `;
 

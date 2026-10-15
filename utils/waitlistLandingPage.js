@@ -744,7 +744,7 @@ exports.renderWaitlistErrorPage = ({ message }) => {
     <div class="icon">⚠️</div>
     <h1>Verification Link Expired or Invalid</h1>
     <p>${message || "We could not verify your email address. The link may have expired or already been used."}</p>
-    <a href="https://hedge-nest.vercel.app/waitlist" class="btn">Return to Waitlist</a>
+    <a href="https://hedgenestwaitlist.vercel.app" class="btn">Return to Waitlist</a>
   </div>
 </body>
 </html>`;
