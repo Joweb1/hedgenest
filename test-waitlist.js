@@ -45,8 +45,8 @@ async function runTests() {
     console.error(`❌ Test 1 FAILED:`, error.response?.data || error.message);
   }
 
-  // Test 2: Duplicate Email Prevention
-  console.log(`🔹 Test 2: Attempting duplicate registration with same email...`);
+  // Test 2a: Unverified Duplicate Email Auto-Resend
+  console.log(`🔹 Test 2a: Attempting duplicate registration with unverified email...`);
   try {
     const payload = {
       firstName: "Adaeze",
@@ -55,15 +55,55 @@ async function runTests() {
       amountRange: "5000-100000-annually"
     };
 
-    await axios.post(WAITLIST_ENDPOINT, payload);
-    console.error(`❌ Test 2 FAILED: Duplicate email should have been rejected!\n`);
+    const res = await axios.post(WAITLIST_ENDPOINT, payload);
+    console.log(`✅ Status: ${res.status}`);
+    console.log(`📦 Response:`, JSON.stringify(res.data, null, 2));
+
+    if (
+      res.status === 200 &&
+      res.data.success === true &&
+      res.data.message.includes("Verification email has been sent to your email") &&
+      res.data.data.verificationToken
+    ) {
+      console.log(`✅ Test 2a PASSED: Unverified re-registration successfully auto-resent verification email!\n`);
+    } else {
+      console.error(`❌ Test 2a FAILED: Unexpected response shape or status\n`);
+    }
+  } catch (error) {
+    console.error(`❌ Test 2a FAILED with unexpected error:`, error.response?.data || error.message);
+  }
+
+  // Test 2b: Verified Duplicate Email Prevention
+  console.log(`🔹 Test 2b: Attempting duplicate registration with verified email...`);
+  try {
+    const verifiedEmail = `verified.${Date.now()}@example.com`;
+    // Register
+    const regRes = await axios.post(WAITLIST_ENDPOINT, {
+      firstName: "Adaeze",
+      lastName: "Agnes",
+      email: verifiedEmail,
+      amountRange: "5000-100000-annually"
+    });
+    // Verify
+    await axios.post(`${BASE_URL}/api/v1/waitlist/verify`, {
+      token: regRes.data.data.verificationToken
+    });
+
+    // Try to register again with verified email
+    await axios.post(WAITLIST_ENDPOINT, {
+      firstName: "Adaeze",
+      lastName: "Agnes",
+      email: verifiedEmail,
+      amountRange: "5000-100000-annually"
+    });
+    console.error(`❌ Test 2b FAILED: Verified duplicate email should have been rejected!\n`);
   } catch (error) {
     if (error.response && error.response.status === 400) {
       console.log(`✅ Status: ${error.response.status} (Bad Request)`);
       console.log(`📦 Response:`, JSON.stringify(error.response.data, null, 2));
-      console.log(`✅ Test 2 PASSED: Duplicate email successfully rejected!\n`);
+      console.log(`✅ Test 2b PASSED: Verified duplicate email successfully rejected!\n`);
     } else {
-      console.error(`❌ Test 2 FAILED with unexpected error:`, error.message);
+      console.error(`❌ Test 2b FAILED with unexpected error:`, error.message);
     }
   }
 

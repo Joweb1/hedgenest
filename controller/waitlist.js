@@ -58,6 +58,37 @@ const generateReferralCode = async () => {
   return code;
 };
 
+const VERIFICATION_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
+
+const sendVerificationEmailHelper = async (waitlistUser) => {
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+  waitlistUser.verificationToken = verificationToken;
+  waitlistUser.verificationExpires = new Date(Date.now() + VERIFICATION_EXPIRY_MS);
+  await waitlistUser.save();
+
+  const referralLink = getFrontendReferralLink(waitlistUser.referralCode);
+  const verifyUrl = getFrontendVerifyUrl(verificationToken, waitlistUser.email);
+
+  try {
+    const emailHtml = waitlistVerificationTemplate({
+      name: waitlistUser.firstName,
+      verifyUrl,
+    });
+    await sendEmail(
+      waitlistUser.email,
+      "You’re almost in - Verify your HedgeNest waitlist spot",
+      emailHtml
+    );
+  } catch (mailError) {
+    console.warn(
+      "Could not send verification email (check Brevo API key):",
+      mailError.message
+    );
+  }
+
+  return { verificationToken, verifyUrl, referralLink };
+};
+
 exports.joinWaitlist = async (req, res) => {
   try {
     const { firstName, lastName, email, amountRange, referralCode } = req.body;
@@ -71,11 +102,27 @@ exports.joinWaitlist = async (req, res) => {
 
     if (existingWaitlistUser) {
       if (!existingWaitlistUser.isVerified) {
-        return res.status(400).json({
-          success: false,
+        // User already registered on waitlist but not verified yet.
+        // Automatically re-send verification email with a fresh 15-minute token.
+        const { verificationToken, verifyUrl, referralLink } =
+          await sendVerificationEmailHelper(existingWaitlistUser);
+
+        return res.status(200).json({
+          success: true,
           message:
-            "Email is already registered on the waitlist but not verified yet. Please check your inbox or request a new verification link.",
-          isVerified: false,
+            "Verification email has been sent to your email. Please check your inbox to secure your spot.",
+          data: {
+            firstName: existingWaitlistUser.firstName,
+            email: existingWaitlistUser.email,
+            referralCode: existingWaitlistUser.referralCode,
+            referralLink,
+            verifyUrl,
+            referralReward: existingWaitlistUser.referralReward,
+            referredBy: existingWaitlistUser.referredBy,
+            referredByCode: existingWaitlistUser.referredByCode,
+            isVerified: false,
+            verificationToken,
+          },
         });
       }
       return res.status(400).json({
@@ -101,7 +148,7 @@ exports.joinWaitlist = async (req, res) => {
     const userReferralCode = await generateReferralCode();
     const referralReward = "1 USDT";
     const verificationToken = crypto.randomBytes(32).toString("hex");
-    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    const verificationExpires = new Date(Date.now() + VERIFICATION_EXPIRY_MS); // 15 minutes
 
     const formattedFirstName =
       firstName.trim().charAt(0).toUpperCase() + firstName.trim().slice(1);
@@ -268,7 +315,7 @@ exports.verifyWaitlistEmail = async (req, res) => {
         return res.status(400).send(
           renderWaitlistErrorPage({
             message:
-              "This verification link has expired (valid for 24 hours). Please request a new verification email.",
+              "This verification link has expired (valid for 15 minutes). Please request a new verification email.",
           })
         );
       }
@@ -399,29 +446,7 @@ exports.resendVerificationEmail = async (req, res) => {
       });
     }
 
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-    waitlistUser.verificationToken = verificationToken;
-    waitlistUser.verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await waitlistUser.save();
-
-    const verifyUrl = getFrontendVerifyUrl(verificationToken, normalizedEmail);
-
-    try {
-      const emailHtml = waitlistVerificationTemplate({
-        name: waitlistUser.firstName,
-        verifyUrl,
-      });
-      await sendEmail(
-        waitlistUser.email,
-        "You’re almost in - Verify your HedgeNest waitlist spot",
-        emailHtml
-      );
-    } catch (mailError) {
-      console.warn(
-        "Could not send verification email (check Brevo API key):",
-        mailError.message
-      );
-    }
+    const { verificationToken } = await sendVerificationEmailHelper(waitlistUser);
 
     return res.status(200).json({
       success: true,

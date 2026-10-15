@@ -12,14 +12,14 @@ const getBrandConfig = () => {
     "https://hedge-nest.vercel.app"
   ).replace(/\/+$/, "");
 
-  const logoUrlLight =
-    process.env.APP_LOGO_LIGHT_URL ||
-    process.env.APP_LOGO_URL ||
-    "https://hedge-nest.vercel.app/assets/Hedge-DBj5Zem1.png";
-
   const logoUrlDark =
     process.env.APP_LOGO_DARK_URL ||
+    process.env.APP_LOGO_URL ||
     "https://hedge-nest.vercel.app/assets/white%20logo-DNTDPlZ9.png";
+
+  const logoUrlLight =
+    process.env.APP_LOGO_LIGHT_URL ||
+    "https://hedge-nest.vercel.app/assets/Hedge-DBj5Zem1.png";
 
   const supportEmail =
     process.env.BREVO_SENDER_EMAIL || "support@hedgenest.com";
@@ -27,8 +27,8 @@ const getBrandConfig = () => {
   return {
     brandName: "HedgeNest",
     frontendUrl,
-    logoUrlLight,
     logoUrlDark,
+    logoUrlLight,
     supportEmail,
     helpUrl: `${frontendUrl}/contact`,
     termsUrl: `${frontendUrl}/policy`,
@@ -37,22 +37,22 @@ const getBrandConfig = () => {
     socials: {
       x: {
         url: "https://x.com/HedgeNest",
-        icon: "https://img.icons8.com/ios-filled/50/94a3b8/twitterx--v1.png",
+        icon: "https://img.icons8.com/ios-filled/100/94a3b8/twitterx--v1.png",
         alt: "X (Twitter)",
       },
       facebook: {
         url: "https://www.facebook.com/profile.php?id=61594261858810",
-        icon: "https://img.icons8.com/ios-filled/50/94a3b8/facebook-new.png",
+        icon: "https://img.icons8.com/ios-filled/100/94a3b8/facebook-new.png",
         alt: "Facebook",
       },
       linkedin: {
         url: "https://www.linkedin.com/company/hedge-nest/",
-        icon: "https://img.icons8.com/ios-filled/50/94a3b8/linkedin.png",
+        icon: "https://img.icons8.com/ios-filled/100/94a3b8/linkedin.png",
         alt: "LinkedIn",
       },
       whatsapp: {
         url: "https://whatsapp.com/channel/0029Vb8WxvMKbYMVa0dihi2A",
-        icon: "https://img.icons8.com/ios-filled/50/94a3b8/whatsapp--v1.png",
+        icon: "https://img.icons8.com/ios-filled/100/94a3b8/whatsapp--v1.png",
         alt: "WhatsApp Channel",
       },
     },
@@ -65,8 +65,8 @@ const getBrandConfig = () => {
 const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
   const {
     brandName,
-    logoUrlLight,
     logoUrlDark,
+    logoUrlLight,
     frontendUrl,
     supportEmail,
     helpUrl,
@@ -87,10 +87,16 @@ const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
     body { margin: 0; padding: 0; width: 100% !important; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; }
+    @media (prefers-color-scheme: light) {
+      .header-brand-cell { background-color: #ffffff !important; border-bottom: 1px solid #f1f5f9 !important; }
+      .dark-logo { display: none !important; }
+      .light-logo { display: block !important; }
+    }
     @media (prefers-color-scheme: dark) {
       .header-brand-cell { background-color: #070d1e !important; border-bottom: 1px solid #1e293b !important; }
-      .light-logo { display: none !important; }
       .dark-logo { display: block !important; }
+      .light-logo { display: none !important; }
+      .social-icon-btn { background-color: #1e293b !important; }
     }
     @media screen and (max-width: 600px) {
       .container { width: 100% !important; border-radius: 0 !important; }
@@ -111,13 +117,13 @@ const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
     <!-- Container Card -->
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="container" style="max-width: 540px; background-color: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06); border: 1px solid #e2e8f0;">
       
-      <!-- Header with HedgeNest Logo (Light & Dark Mode) -->
+      <!-- Header with HedgeNest Logo (Dark Mode Logo as Default/Fallback) -->
       <tr>
-        <td align="center" class="header-brand-cell" style="padding: 28px 24px; background-color: #ffffff; border-bottom: 1px solid #f1f5f9;">
+        <td align="center" class="header-brand-cell" style="padding: 26px 24px; background-color: #070d1e; border-bottom: 1px solid #1e293b;">
           <a href="${frontendUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
-            <img src="${logoUrlLight}" class="light-logo" alt="${brandName}" width="145" height="32" style="display: block; width: 145px; max-width: 145px; height: auto; border: 0;" />
+            <img src="${logoUrlDark}" class="dark-logo" alt="${brandName}" width="145" height="32" style="display: block; width: 145px; max-width: 145px; height: auto; border: 0;" />
             <!--[if !mso]><!-->
-            <img src="${logoUrlDark}" class="dark-logo" alt="${brandName}" width="145" height="32" style="display: none; width: 145px; max-width: 145px; height: auto; border: 0;" />
+            <img src="${logoUrlLight}" class="light-logo" alt="${brandName}" width="145" height="32" style="display: none; width: 145px; max-width: 145px; height: auto; border: 0;" />
             <!--<![endif]-->
           </a>
         </td>
@@ -134,27 +140,27 @@ const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
       <tr>
         <td align="center" style="padding: 30px 24px 28px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; line-height: 1.6;">
           
-          <!-- Social Icons Row -->
-          <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
+          <!-- Social Icons Row (Bigger, High-contrast, 44px Touch Targets) -->
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 22px;">
             <tr>
-              <td style="padding: 0 8px;">
-                <a href="${socials.x.url}" target="_blank" title="X (Twitter)" style="display: inline-block; width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 34px;">
-                  <img src="${socials.x.icon}" alt="X" width="16" height="16" style="vertical-align: middle; margin-top: 9px;" />
+              <td style="padding: 0 10px;">
+                <a href="${socials.x.url}" target="_blank" title="X (Twitter)" class="social-icon-btn" style="display: inline-block; width: 44px; height: 44px; border-radius: 50%; background-color: #e2e8f0; text-align: center; text-decoration: none;">
+                  <img src="${socials.x.icon}" alt="X" width="22" height="22" style="display: inline-block; width: 22px; height: 22px; margin-top: 11px; vertical-align: middle; border: 0;" />
                 </a>
               </td>
-              <td style="padding: 0 8px;">
-                <a href="${socials.facebook.url}" target="_blank" title="Facebook" style="display: inline-block; width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 34px;">
-                  <img src="${socials.facebook.icon}" alt="Facebook" width="16" height="16" style="vertical-align: middle; margin-top: 9px;" />
+              <td style="padding: 0 10px;">
+                <a href="${socials.facebook.url}" target="_blank" title="Facebook" class="social-icon-btn" style="display: inline-block; width: 44px; height: 44px; border-radius: 50%; background-color: #e2e8f0; text-align: center; text-decoration: none;">
+                  <img src="${socials.facebook.icon}" alt="Facebook" width="22" height="22" style="display: inline-block; width: 22px; height: 22px; margin-top: 11px; vertical-align: middle; border: 0;" />
                 </a>
               </td>
-              <td style="padding: 0 8px;">
-                <a href="${socials.linkedin.url}" target="_blank" title="LinkedIn" style="display: inline-block; width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 34px;">
-                  <img src="${socials.linkedin.icon}" alt="LinkedIn" width="16" height="16" style="vertical-align: middle; margin-top: 9px;" />
+              <td style="padding: 0 10px;">
+                <a href="${socials.linkedin.url}" target="_blank" title="LinkedIn" class="social-icon-btn" style="display: inline-block; width: 44px; height: 44px; border-radius: 50%; background-color: #e2e8f0; text-align: center; text-decoration: none;">
+                  <img src="${socials.linkedin.icon}" alt="LinkedIn" width="22" height="22" style="display: inline-block; width: 22px; height: 22px; margin-top: 11px; vertical-align: middle; border: 0;" />
                 </a>
               </td>
-              <td style="padding: 0 8px;">
-                <a href="${socials.whatsapp.url}" target="_blank" title="WhatsApp Channel" style="display: inline-block; width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 34px;">
-                  <img src="${socials.whatsapp.icon}" alt="WhatsApp" width="16" height="16" style="vertical-align: middle; margin-top: 9px;" />
+              <td style="padding: 0 10px;">
+                <a href="${socials.whatsapp.url}" target="_blank" title="WhatsApp Channel" class="social-icon-btn" style="display: inline-block; width: 44px; height: 44px; border-radius: 50%; background-color: #e2e8f0; text-align: center; line-height: 44px; text-decoration: none;">
+                  <img src="${socials.whatsapp.icon}" alt="WhatsApp" width="22" height="22" style="display: inline-block; width: 22px; height: 22px; margin-top: 11px; vertical-align: middle; border: 0;" />
                 </a>
               </td>
             </tr>
@@ -494,7 +500,7 @@ exports.waitlistVerificationTemplate = ({ name, verifyUrl }) => {
     <!-- Expiry Guidance -->
     <div style="background-color: #f8fafc; border-left: 3px solid #ddad0f; border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 0 0 20px;">
       <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">
-        This verification link is valid for <strong>24 hours</strong>. If you did not sign up for the HedgeNest waitlist, you can safely ignore this email.
+        This verification link is valid for <strong>15 minutes</strong>. If you did not sign up for the HedgeNest waitlist, you can safely ignore this email.
       </p>
     </div>
   `;
