@@ -36,14 +36,14 @@ const getFrontendReferralLink = (referralCode) => {
 const getFrontendVerifyUrl = (token, email) => {
   const baseUrl = (
     process.env.FRONTEND_VERIFY_URL ||
-    process.env.FRONTEND_URL ||
-    process.env.CLIENT_URL ||
-    "https://hedge-nest.vercel.app"
+    process.env.WAITLIST_FRONTEND_URL ||
+    "https://hedgenestwaitlist.vercel.app"
   ).trim();
 
-  const finalBase = baseUrl.includes("localhost")
-    ? "https://hedge-nest.vercel.app"
-    : baseUrl;
+  const finalBase =
+    baseUrl.includes("localhost") || baseUrl.includes("hedge-nest.vercel.app")
+      ? "https://hedgenestwaitlist.vercel.app"
+      : baseUrl;
 
   const cleanBase = finalBase.replace(/\/+$/, "");
   const urlPath = cleanBase.split("/").length > 3 ? cleanBase : `${cleanBase}/`;
