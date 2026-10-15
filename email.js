@@ -98,6 +98,33 @@ const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
       .light-logo { display: none !important; }
       .social-icon-btn { background-color: #1e293b !important; }
     }
+    @keyframes graffitiPulse {
+      0%, 100% {
+        transform: rotate(-3deg) scale(1);
+        box-shadow: 0 0 16px rgba(16, 185, 129, 0.32), 0 4px 10px rgba(5, 150, 105, 0.15);
+      }
+      50% {
+        transform: rotate(2deg) scale(1.06);
+        box-shadow: 0 0 28px rgba(16, 185, 129, 0.55), 0 8px 18px rgba(5, 150, 105, 0.25);
+      }
+    }
+    @keyframes graffitiGlow {
+      0%, 100% {
+        color: #059669;
+        text-shadow: 1px 1px 0px #a7f3d0, 0 0 6px rgba(16, 185, 129, 0.35);
+      }
+      50% {
+        color: #10b981;
+        text-shadow: 2px 2px 0px #6ee7b7, 0 0 14px rgba(16, 185, 129, 0.65);
+      }
+    }
+    .graffiti-badge {
+      animation: graffitiPulse 3s ease-in-out infinite;
+      display: inline-block;
+    }
+    .graffiti-number {
+      animation: graffitiGlow 3s ease-in-out infinite;
+    }
     @media screen and (max-width: 600px) {
       .container { width: 100% !important; border-radius: 0 !important; }
       .content-cell { padding: 28px 20px !important; }
@@ -117,13 +144,13 @@ const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
     <!-- Container Card -->
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="container" style="max-width: 540px; background-color: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06); border: 1px solid #e2e8f0;">
       
-      <!-- Header with HedgeNest Logo (Dark Mode Logo as Default/Fallback) -->
+      <!-- Header with HedgeNest Logo (Dark Mode Logo as Default/Fallback, Compact Sizing) -->
       <tr>
-        <td align="center" class="header-brand-cell" style="padding: 26px 24px; background-color: #070d1e; border-bottom: 1px solid #1e293b;">
+        <td align="center" class="header-brand-cell" style="padding: 18px 20px; background-color: #070d1e; border-bottom: 1px solid #1e293b;">
           <a href="${frontendUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
-            <img src="${logoUrlDark}" class="dark-logo" alt="${brandName}" width="145" height="32" style="display: block; width: 145px; max-width: 145px; height: auto; border: 0;" />
+            <img src="${logoUrlDark}" class="dark-logo" alt="${brandName}" width="100" style="display: block; width: 100px; max-width: 100px; height: auto; border: 0;" />
             <!--[if !mso]><!-->
-            <img src="${logoUrlLight}" class="light-logo" alt="${brandName}" width="145" height="32" style="display: none; width: 145px; max-width: 145px; height: auto; border: 0;" />
+            <img src="${logoUrlLight}" class="light-logo" alt="${brandName}" width="100" style="display: none; width: 100px; max-width: 100px; height: auto; border: 0;" />
             <!--<![endif]-->
           </a>
         </td>
@@ -140,27 +167,27 @@ const renderEmailLayout = ({ title, previewText = "", contentHtml }) => {
       <tr>
         <td align="center" style="padding: 30px 24px 28px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; line-height: 1.6;">
           
-          <!-- Social Icons Row (Bigger, High-contrast, 44px Touch Targets) -->
-          <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 22px;">
+          <!-- Social Icons Row (Properly Centered, High-contrast, 40px Touch Targets) -->
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto 22px;">
             <tr>
-              <td style="padding: 0 10px;">
-                <a href="${socials.x.url}" target="_blank" title="X (Twitter)" class="social-icon-btn" style="display: inline-block; width: 44px; height: 44px; border-radius: 50%; background-color: #e2e8f0; text-align: center; text-decoration: none;">
-                  <img src="${socials.x.icon}" alt="X" width="22" height="22" style="display: inline-block; width: 22px; height: 22px; margin-top: 11px; vertical-align: middle; border: 0;" />
+              <td align="center" valign="middle" style="padding: 0 8px;">
+                <a href="${socials.x.url}" target="_blank" title="X (Twitter)" class="social-icon-btn" style="display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; background-color: #e2e8f0; text-align: center; vertical-align: middle; text-decoration: none;">
+                  <img src="${socials.x.icon}" alt="X" width="20" height="20" style="display: inline-block; width: 20px; height: 20px; vertical-align: middle; border: 0; margin: 0; padding: 0;" />
                 </a>
               </td>
-              <td style="padding: 0 10px;">
-                <a href="${socials.facebook.url}" target="_blank" title="Facebook" class="social-icon-btn" style="display: inline-block; width: 44px; height: 44px; border-radius: 50%; background-color: #e2e8f0; text-align: center; text-decoration: none;">
-                  <img src="${socials.facebook.icon}" alt="Facebook" width="22" height="22" style="display: inline-block; width: 22px; height: 22px; margin-top: 11px; vertical-align: middle; border: 0;" />
+              <td align="center" valign="middle" style="padding: 0 8px;">
+                <a href="${socials.facebook.url}" target="_blank" title="Facebook" class="social-icon-btn" style="display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; background-color: #e2e8f0; text-align: center; vertical-align: middle; text-decoration: none;">
+                  <img src="${socials.facebook.icon}" alt="Facebook" width="20" height="20" style="display: inline-block; width: 20px; height: 20px; vertical-align: middle; border: 0; margin: 0; padding: 0;" />
                 </a>
               </td>
-              <td style="padding: 0 10px;">
-                <a href="${socials.linkedin.url}" target="_blank" title="LinkedIn" class="social-icon-btn" style="display: inline-block; width: 44px; height: 44px; border-radius: 50%; background-color: #e2e8f0; text-align: center; text-decoration: none;">
-                  <img src="${socials.linkedin.icon}" alt="LinkedIn" width="22" height="22" style="display: inline-block; width: 22px; height: 22px; margin-top: 11px; vertical-align: middle; border: 0;" />
+              <td align="center" valign="middle" style="padding: 0 8px;">
+                <a href="${socials.linkedin.url}" target="_blank" title="LinkedIn" class="social-icon-btn" style="display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; background-color: #e2e8f0; text-align: center; vertical-align: middle; text-decoration: none;">
+                  <img src="${socials.linkedin.icon}" alt="LinkedIn" width="20" height="20" style="display: inline-block; width: 20px; height: 20px; vertical-align: middle; border: 0; margin: 0; padding: 0;" />
                 </a>
               </td>
-              <td style="padding: 0 10px;">
-                <a href="${socials.whatsapp.url}" target="_blank" title="WhatsApp Channel" class="social-icon-btn" style="display: inline-block; width: 44px; height: 44px; border-radius: 50%; background-color: #e2e8f0; text-align: center; line-height: 44px; text-decoration: none;">
-                  <img src="${socials.whatsapp.icon}" alt="WhatsApp" width="22" height="22" style="display: inline-block; width: 22px; height: 22px; margin-top: 11px; vertical-align: middle; border: 0;" />
+              <td align="center" valign="middle" style="padding: 0 8px;">
+                <a href="${socials.whatsapp.url}" target="_blank" title="WhatsApp Channel" class="social-icon-btn" style="display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; background-color: #e2e8f0; text-align: center; vertical-align: middle; text-decoration: none;">
+                  <img src="${socials.whatsapp.icon}" alt="WhatsApp" width="20" height="20" style="display: inline-block; width: 20px; height: 20px; vertical-align: middle; border: 0; margin: 0; padding: 0;" />
                 </a>
               </td>
             </tr>
@@ -534,16 +561,18 @@ exports.waitlistWelcomeTemplate = ({
 
   const contentHtml = `
     <!-- Category Badge -->
-    <div style="display: inline-block; background-color: #ecfdf5; color: #065f46; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 18px;">
-      Spot Confirmed
+    <div style="text-align: center; margin-bottom: 16px;">
+      <div style="display: inline-block; background-color: #ecfdf5; color: #065f46; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+        Spot Confirmed
+      </div>
     </div>
 
-    <!-- Success Checkmark Badge (Clean SVG Icon, No Emojis) -->
-    <div style="text-align: center; margin-bottom: 20px;">
-      <div style="display: inline-block; width: 60px; height: 60px; line-height: 60px; background-color: #ecfdf5; border: 2px solid #10b981; border-radius: 50%; color: #10b981; text-align: center;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
+    <!-- Green Circle Badge with Greenish Position Number and Graffiti Animation -->
+    <div style="text-align: center; margin: 8px 0 22px;">
+      <div class="graffiti-badge" style="display: inline-block; width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ecfdf5 0%, #d1fae5 70%, #a7f3d0 100%); border: 3px solid #10b981; box-shadow: 0 0 18px rgba(16, 185, 129, 0.32), inset 0 2px 4px rgba(255, 255, 255, 0.6); text-align: center;">
+        <div class="graffiti-number" style="line-height: 86px; font-size: 36px; font-weight: 900; color: #059669; font-family: 'Impact', 'Arial Black', -apple-system, BlinkMacSystemFont, sans-serif; letter-spacing: -0.5px; text-shadow: 1px 1px 0px #a7f3d0, 0 0 6px rgba(16, 185, 129, 0.35); transform: rotate(-3deg);">
+          #${waitlistPosition}
+        </div>
       </div>
     </div>
 
@@ -555,22 +584,6 @@ exports.waitlistWelcomeTemplate = ({
     <p style="font-size: 15px; line-height: 1.6; margin: 0 0 28px; color: #64748b; text-align: center;">
       Hello <strong>${name}</strong>, your email has been verified and your place on the HedgeNest waitlist is officially locked in.
     </p>
-
-    <!-- Hero Card: Waitlist Position -->
-    <div style="background: linear-gradient(135deg, #0a1931 0%, #0f172a 100%); border-radius: 14px; padding: 28px 20px; color: #ffffff; text-align: center; margin-bottom: 28px; box-shadow: 0 8px 20px rgba(10, 25, 49, 0.15);">
-      <p style="margin: 0; color: #ddad0f; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;">
-        Your Waitlist Position
-      </p>
-      <div class="hero-number" style="margin: 10px 0; font-size: 52px; font-weight: 900; color: #ffffff; letter-spacing: -1px; line-height: 1;">
-        #${waitlistPosition}
-      </div>
-      <p style="margin: 0; color: #94a3b8; font-size: 14px;">
-        Out of <strong style="color: #ffffff;">${formattedTotal}</strong> registered members
-      </p>
-      <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; font-size: 12px; font-style: italic;">
-        Priority onboarding starts soon. We’ll reach out when <strong>HedgeNest</strong> is ready for you.
-      </div>
-    </div>
 
     <!-- Referral Reward Feature Card -->
     <div style="background-color: #fffbeb; border: 1.5px dashed #fde68a; border-radius: 14px; padding: 24px; margin-bottom: 26px;">
