@@ -1,178 +1,231 @@
+const crypto = require('crypto')
+const axios = require('axios')
 const userModel = require('../model/user')
 const kycModel = require('../model/kyc')
-const cloudinary = require('../middleware/cloudinary');
-const fs = require('fs');
-const bcrypt = require('bcrypt')
-const axios = require('axios')
 
+const METAMAP_API = process.env.METAMAP_API_URL || 'https://api.prod.metamap.com'
 
-exports.kyc1Verification = async (req, res) => {
-  try {
-    const userId = req.user.id
-    const {id} = req.body
-    const verification_consent = true;
+const blindIndex = (value) =>
+  crypto.createHmac('sha256', process.env.PII_HASH_SALT).update(String(value).trim()).digest('hex')
 
-    const user = await userModel.findById(userId)
-    if(!user){
-      return res.status(404).json({
-        message: 'User not found'
-      })
-    }
+const normalizeName = (name) =>
+  String(name || '').toLowerCase().replace(/[^a-z]/g, '')
 
-    if (!id) {
-      return res.status(400).json({
-      success: false,
-      message: "NIN is required"
-    });
-  }
-    if (id == 0) {
-      return res.status(400).json({
-      success: false,
-      message: "NIN is invalid"
-    });
-  }
+const verifySignature = (req) => {
+  const secret = process.env.METAMAP_WEBHOOK_SECRET
+  const received = req.headers['x-signature'] || ''
+  if (!secret || !req.rawBody || !received) return false
 
-  const existingKyc = await kycModel.findOne({
-    userId: user._id,
-    isVerified1: true
-  });
-  
-  if (existingKyc) {
-    return res.status(400).json({
-        success: false,
-        message: "Identity is already verified"
-    });
+  const computed = crypto.createHmac('sha256', secret).update(req.rawBody).digest('hex')
+  const a = Buffer.from(computed, 'hex')
+  const b = Buffer.from(received, 'hex')
+  return a.length === b.length && crypto.timingSafeEqual(a, b)
 }
-  
-  const data  = await axios.post('https://api.korapay.com/merchant/api/v1/identities/ng/nin',
-    {
-      id,
-      verification_consent
-    },
-    {
-      headers: {Authorization: `Bearer ${process.env.KORA_API_KEY}`,
-      "Content-Type": "application/json"
-    }
-  })
-  const salt = await bcrypt.genSalt(10);
-  const hashPassword = await bcrypt.hash(id, salt)
 
-  const kyc = new kycModel({
-    userId: user._id,
-    id : hashPassword,
-    userFirstName: data?.data.data.first_name,
-    userLastName: data?.data.data.last_name,
-  })
+const getMetaMapToken = async () => {
+  const basic = Buffer.from(
+    `${process.env.METAMAP_CLIENT_ID}:${process.env.METAMAP_CLIENT_SECRET}`
+  ).toString('base64')
+  const { data } = await axios.post(
+    `${METAMAP_API}/oauth`,
+    'grant_type=client_credentials',
+    { headers: { Authorization: `Basic ${basic}`, 'Content-Type': 'application/x-www-form-urlencoded' } }
+  )
+  return data.access_token
+}
 
-  if (data?.data.status === true && data?.data.message === 'NIN verified successfully'){
-    if (!data?.data.status) {
-      return res.status(400).json({
-        success: false,
-        message: "NIN verification failed"
-      });
-    }
-    const ninData = data?.data.data;
-    
-    const nameMatches = user.firstName.toLowerCase().trim() === ninData.first_name.toLowerCase().trim() &&
-            user.lastName.toLowerCase().trim() === ninData.last_name.toLowerCase().trim();
-            if (!nameMatches) {
-              return res.status(400).json({
-                success: false,
-                message: "NIN does not match user details"
-            });
-          }
-          
-          kyc.isVerified1 = true;
-          user.tier = 1
-          await user.save();
-          await kyc.save()
-          res.status(200).json({
-            success: true,
-            message: data.message,
-            data: { 
-              ...data.data.data,
-              isVerified1: kyc.isVerified1
-            }
-          });
-        }
-      } catch (error) {
-        console.error(error)
-        res.status(500).json({
-          success: false,
-          message: "Failed to verify NIN",
-        });
-      }
-    }
+const fetchVerification = async (resourceUrl) => {
+  const token = await getMetaMapToken()
+  const { data } = await axios.get(resourceUrl, { headers: { Authorization: `Bearer ${token}` } })
+  return data
+}
 
-exports.uploadUtility = async (req, res) => {
-  let uploadResult;
+// Pulls the NIN and names out of MetaMap's verification resource.
+const extractIdentity = (verification) => {
+  const fields = {}
+  for (const doc of verification?.documents || []) {
+    Object.assign(fields, doc.fields || {})
+  }
+  const val = (key) => fields[key]?.value
+  let firstName = val('firstName')
+  let lastName = val('surname') || val('lastName')
+  if ((!firstName || !lastName) && val('fullName')) {
+    const parts = String(val('fullName')).trim().split(/\s+/)
+    firstName = firstName || parts[0]
+    lastName = lastName || parts[parts.length - 1]
+  }
+  return {
+    nin: val('documentNumber') || val('nin') || val('idNumber'),
+    firstName,
+    lastName,
+    fullName: val('fullName'),
+  }
+}
 
+// Matches when the user's first and last names both appear in the NIN record.
+const namesMatch = (user, identity) => {
+  const haystack = normalizeName(
+    [identity.firstName, identity.lastName, identity.fullName].filter(Boolean).join(' ')
+  )
+  const first = normalizeName(user.firstName)
+  const last = normalizeName(user.lastName)
+  return !!haystack && !!first && !!last && haystack.includes(first) && haystack.includes(last)
+}
+
+// Returns the public values the MetaMap web button needs to launch the Tier 1 flow.
+exports.initiateTier1 = async (req, res) => {
   try {
-    const file = req.file;
-    const { id } = req.user
-    const user = await userModel.findById(id)
+    if (!process.env.METAMAP_CLIENT_ID || !process.env.METAMAP_FLOW_TIER1_ID) {
+      return res.status(503).json({ success: false, message: 'KYC provider is not configured' })
+    }
 
+    const user = await userModel.findById(req.user.id)
     if (!user) {
-      return res.status(400).json({
-        status: false,
-        message: "User not found"
-      })
-    };
-
-    if (user.tier < 1) {
-      return res.status(403).json({
-        message: "Complete Tier 1 verification before proceeding to Tier 2"
-      });
+      return res.status(404).json({ success: false, message: 'User not found' })
+    }
+    if (user.tier >= 1) {
+      return res.status(400).json({ success: false, message: 'Identity is already verified' })
     }
 
-    const kyc = await kycModel.findOne({userId: user._id}).sort({ createdAt: -1 })
-    
-    if (!kyc) {
-      deleteTempFile(file);
-      return res.status(400).json({
-        status: false,
-        message: "KYC not uploaded"
-      })
-    };
-
-    if (!file?.path) {
-      return res.status(400).json({
-        status: false,
-        message: "Utility bill is required"
-      })
-    }
-
-    uploadResult = await cloudinary.uploader.upload(file.path, {
-      folder: 'utility-bill'
-    });
-
-    fs.unlinkSync(file.path);
-
-    const utilityBill = {
-      url: uploadResult.secure_url,
-      publicId: uploadResult.public_id
-    };
-
-    kyc.utilityBill = utilityBill;
-    kyc.isVerified2 = true
-    user.tier = 2;
-
-    await kyc.save();
-    await user.save();
+    const sessionId = crypto.randomBytes(16).toString('hex')
+    await kycModel.findOneAndUpdate(
+      { userId: user._id, status: { $in: ['pending', 'rejected', 'needs_review'] } },
+      { userId: user._id, flowId: process.env.METAMAP_FLOW_TIER1_ID, status: 'pending', rejectionReason: null, sessionId },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
 
     res.status(200).json({
-      status: true,
-      message: 'Utility bill uploaded successfully',
-      utilityBill: kyc.utilityBill,
-      tier: user.tier,
-      isVerified2: kyc.isVerified2
-
+      success: true,
+      message: 'Launch the MetaMap SDK with the details below',
+      data: {
+        clientId: process.env.METAMAP_CLIENT_ID,
+        flowId: process.env.METAMAP_FLOW_TIER1_ID,
+        metadata: { userId: String(user._id), sessionId, tier: 1 },
+      },
     })
   } catch (error) {
-    deleteTempFile(file);
-    res.status(500).json({
-      message: 'Error uploading utility bill',
-      error: error.message
+    console.error('initiateTier1 error:', error)
+    res.status(500).json({ success: false, message: 'Failed to start verification' })
+  }
+}
+
+exports.initiateTier2 = (req, res) => {
+  res.status(501).json({
+    success: false,
+    code: 'KYC_TIER2_UNAVAILABLE',
+    message: 'Tier 2 verification (face liveness) is not available yet.',
+  })
+}
+
+exports.getStatus = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user.id).select('tier')
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' })
+    }
+    const kyc = await kycModel.findOne({ userId: user._id }).sort({ createdAt: -1 })
+    res.status(200).json({
+      success: true,
+      data: {
+        tier: user.tier || 0,
+        status: kyc?.status || 'not_started',
+        rejectionReason: kyc?.rejectionReason || null,
+      },
     })
+  } catch (error) {
+    console.error('getStatus error:', error)
+    res.status(500).json({ success: false, message: 'Failed to fetch KYC status' })
+  }
+}
+
+exports.metamapWebhook = async (req, res) => {
+  try {
+    if (!verifySignature(req)) {
+      return res.status(401).json({ success: false, message: 'Invalid signature' })
+    }
+
+    const { eventName, resource, metadata, identityStatus } = req.body
+    if (eventName !== 'verification_completed') {
+      return res.status(200).json({ success: true, message: 'Event ignored' })
+    }
+
+    const verificationId = req.body.resource?.split('/').pop() || req.body.id
+    const userId = metadata?.userId
+    const sessionId = metadata?.sessionId
+    if (!userId || !sessionId || !verificationId) {
+      return res.status(200).json({ success: true, message: 'Missing metadata, ignored' })
+    }
+
+    // Idempotency: a verification is only ever processed once.
+    if (await kycModel.exists({ verificationId })) {
+      return res.status(200).json({ success: true, message: 'Already processed' })
+    }
+
+    const kyc = await kycModel.findOne({ userId, sessionId, status: { $in: ['pending', 'rejected', 'needs_review'] } })
+    const user = kyc && (await userModel.findById(userId))
+    if (!user || !kyc) {
+      return res.status(200).json({ success: true, message: 'No matching KYC session' })
+    }
+    kyc.verificationId = verificationId
+    kyc.sessionId = undefined // single use
+
+    if (identityStatus !== 'verified') {
+      kyc.status = 'rejected'
+      kyc.rejectionReason = 'Identity verification was not successful'
+      await kyc.save()
+      return res.status(200).json({ success: true })
+    }
+
+    // With API access (client secret, paid plan) also confirm the NIN belongs to this user.
+    if (process.env.METAMAP_CLIENT_SECRET && resource) {
+      let identity
+      try {
+        identity = extractIdentity(await fetchVerification(resource))
+      } catch (err) {
+        console.error('MetaMap verification fetch failed:', err.message)
+      }
+
+      if (!identity || !identity.nin) {
+        kyc.status = 'needs_review'
+        kyc.rejectionReason = 'Could not read NIN details from provider'
+        await kyc.save()
+        return res.status(200).json({ success: true })
+      }
+
+      kyc.userFirstName = identity.firstName
+      kyc.userLastName = identity.lastName
+
+      if (!namesMatch(user, identity)) {
+        kyc.status = 'rejected'
+        kyc.rejectionReason = 'NIN does not match user details'
+        await kyc.save()
+        return res.status(200).json({ success: true })
+      }
+
+      const ninHash = blindIndex(identity.nin)
+      if (await kycModel.exists({ ninHash, userId: { $ne: user._id } })) {
+        kyc.status = 'rejected'
+        kyc.rejectionReason = 'This NIN is already linked to another account'
+        await kyc.save()
+        return res.status(200).json({ success: true })
+      }
+
+      kyc.ninHash = ninHash
+      kyc.nameVerified = true
+    }
+
+    kyc.status = 'verified'
+    kyc.isVerified1 = true
+    kyc.rejectionReason = null
+    await kyc.save()
+
+    user.tier = Math.max(user.tier || 0, 1)
+    await user.save()
+
+    res.status(200).json({ success: true })
+  } catch (error) {
+    console.error('metamapWebhook error:', error)
+    // 500 lets MetaMap retry delivery.
+    res.status(500).json({ success: false, message: 'Webhook processing failed' })
   }
 }

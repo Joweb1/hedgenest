@@ -669,7 +669,12 @@ exports.payoutValidator = (req, res, next) => {
   next();
 };
 
-const { ALLOWED_AMOUNT_RANGES } = require("../model/waitlist");
+const {
+  ALLOWED_AMOUNT_RANGES,
+  ALLOWED_USER_TYPES,
+  ALLOWED_GENDERS,
+  normalizeNigerianPhone,
+} = require("../model/waitlist");
 
 exports.waitlistValidator = (req, res, next) => {
   const schema = joi.object({
@@ -704,6 +709,40 @@ exports.waitlistValidator = (req, res, next) => {
         "any.required": "Email is required",
         "string.empty": "Email cannot be empty",
         "string.email": "Email must be a valid email",
+      }),
+    phoneNumber: joi
+      .string()
+      .trim()
+      .custom((value, helpers) => {
+        const normalized = normalizeNigerianPhone(value);
+        return normalized || helpers.error("any.invalid");
+      })
+      .required()
+      .messages({
+        "any.required": "Phone number is required",
+        "string.empty": "Phone number cannot be empty",
+        "any.invalid": "Phone number must be a valid Nigerian mobile number",
+      }),
+    gender: joi
+      .string()
+      .trim()
+      .lowercase()
+      .valid(...ALLOWED_GENDERS)
+      .required()
+      .messages({
+        "any.required": "Gender is required",
+        "string.empty": "Gender is required",
+        "any.only": `Gender must be one of: ${ALLOWED_GENDERS.join(", ")}`,
+      }),
+    userType: joi
+      .string()
+      .trim()
+      .valid(...ALLOWED_USER_TYPES)
+      .required()
+      .messages({
+        "any.required": "Please tell us what best describes you",
+        "string.empty": "Please tell us what best describes you",
+        "any.only": `User type must be one of: ${ALLOWED_USER_TYPES.join(", ")}`,
       }),
     amountRange: joi
       .string()

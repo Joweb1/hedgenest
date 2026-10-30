@@ -1,5 +1,12 @@
 # HedgeNest KYC Implementation & Architecture Plan
 
+> **Current status (MetaMap free tier = one flow only)**
+> - **Tier 1 (NIN only): implemented.** BVN is not part of the flow.
+> - **Tier 2: not implemented.** It will be Face Liveness / Face Match (plus Proof of Address as planned) and needs a second MetaMap flow. `POST /kyc/tier2/initiate` returns 501 until then.
+> - While Tier 2 is unavailable, `/initiateInvestment` (needs Tier 2) is blocked for everyone unless an admin turns KYC mode off.
+> - The Kora NIN lookup and Cloudinary utility-bill upload were removed. The MetaMap web button is launched client-side; the backend only returns the public launch details and processes the webhook.
+> - See `KYC_IMPLEMENTATION_NOTES.md` for what was built and how to test it.
+
 ## 1. Executive Summary
 
 This document outlines the end-to-end technical plan, security protocols, API flows, and required credentials for implementing a two-tier **Know Your Customer (KYC)** system in HedgeNest.
@@ -21,7 +28,7 @@ The verification process is divided into two distinct, decoupled stages that use
         │  • Can Save (SmartSave Vaults)
         │  • Cannot Invest
         │
-        ▼  Complete Stage 2 (Face Liveness + Proof of Address via MetaMap)
+        ▼  Complete Stage 2 (Face Liveness / Face Verification + Proof of Address via MetaMap)
 [ Accredited Investor ] (Tier 2)
         │  • Can Convert
         │  • Can Save
@@ -45,7 +52,7 @@ To implement and deploy this architecture, the following configuration parameter
 
 ### A. MetaMap Dashboard Credentials
 1. **`METAMAP_CLIENT_ID`**: Public Client ID found under MetaMap Dashboard > Integrations > API Keys.
-2. **`METAMAP_CLIENT_SECRET`**: Private Client Secret used by the backend to obtain OAuth access tokens (`POST /oauth`).
+2. **`METAMAP_CLIENT_SECRET`** *(paid plans only; not used on the free tier)*: Private Client Secret used by the backend to obtain OAuth access tokens (`POST /oauth`).
 3. **`METAMAP_WEBHOOK_SECRET`**: The shared secret configured under MetaMap Dashboard > Integrations > Webhooks for HMAC-SHA256 signature verification.
 
 ### B. MetaMap Flow / Template IDs

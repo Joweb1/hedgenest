@@ -1,4 +1,4 @@
-const { waitlistModel } = require("../model/waitlist");
+const { waitlistModel, normalizeNigerianPhone } = require("../model/waitlist");
 const crypto = require("crypto");
 const { sendEmail } = require("../utils/brevo");
 const {
@@ -91,7 +91,8 @@ const sendVerificationEmailHelper = async (waitlistUser) => {
 
 exports.joinWaitlist = async (req, res) => {
   try {
-    const { firstName, lastName, email, amountRange, referralCode } = req.body;
+    const { firstName, lastName, email, phoneNumber, gender, userType, amountRange, referralCode } =
+      req.body;
 
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -131,6 +132,17 @@ exports.joinWaitlist = async (req, res) => {
       });
     }
 
+    const normalizedPhone = normalizeNigerianPhone(phoneNumber);
+    const phoneTaken = await waitlistModel.findOne({
+      phoneNumber: normalizedPhone,
+    });
+    if (phoneTaken) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number is already registered on the waitlist",
+      });
+    }
+
     // Connect to referring user if a valid referral code was provided
     let referredBy = null;
     let referredByCode = null;
@@ -159,6 +171,9 @@ exports.joinWaitlist = async (req, res) => {
       firstName: formattedFirstName,
       lastName: formattedLastName,
       email: normalizedEmail,
+      phoneNumber: normalizedPhone,
+      gender,
+      userType,
       amountRange,
       referredBy,
       referredByCode,

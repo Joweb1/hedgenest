@@ -15,6 +15,8 @@ const {
   getAllInvestment,
   getAllConversion,
   getAllWaitlist,
+  getKycMode,
+  setKycMode,
 } = require("../controller/admin");
 const { Authentication, adminAuth } = require("../middleware/auth");
 const {
@@ -52,6 +54,8 @@ router.get(
 router.get("/get-all-revenue", Authentication, adminAuth, getAllRevenue);
 router.get("/get-all-conversion", Authentication, getAllConversion);
 router.get("/get-all-waitlist", Authentication, adminAuth, getAllWaitlist);
+router.get("/admin/kyc-mode", Authentication, adminAuth, getKycMode);
+router.patch("/admin/kyc-mode", Authentication, adminAuth, setKycMode);
 
 module.exports = router;
 

@@ -1,10 +1,10 @@
 const router = require('express').Router()
-const { uploadUtility, kyc1Verification } = require('../controller/kyc')
+const { initiateTier1, initiateTier2, getStatus, metamapWebhook } = require('../controller/kyc')
 const { Authentication } = require('../middleware/auth')
-const upload = require('../middleware/multer');
-const {kycValidator} = require('../middleware/validators')
 
+router.post('/kyc/tier1/initiate', Authentication, initiateTier1)
+router.post('/kyc/tier2/initiate', Authentication, initiateTier2)
+router.get('/kyc/status', Authentication, getStatus)
+router.post('/kyc/webhook', metamapWebhook)
 
-router.post('/verify',Authentication, kycValidator, kyc1Verification)
-router.put('/uploadUtilityBill', Authentication, upload.single('utilityBill'), uploadUtility)
 module.exports = router
