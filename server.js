@@ -25,7 +25,8 @@ const investmentRouter = require('./routes/investment')
 const smartSaveRouter = require('./routes/smartSave')
 const percentageRouter = require('./routes/percentage')
 const waitlistRouter = require('./routes/waitlist')
-app.use(express.json());
+// rawBody is needed to verify MetaMap webhook HMAC signatures
+app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf } }));
 app.use(cors())
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swagger))

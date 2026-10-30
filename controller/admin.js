@@ -19,6 +19,7 @@ const investmentModel = require("../model/investment");
 const smartSaveModel = require("../model/smartSave");
 const walletModel = require("../model/wallet");
 const { waitlistModel } = require("../model/waitlist");
+const systemSettingModel = require("../model/systemSetting");
 
 exports.createAdmin = async (req, res) => {
   try {
@@ -518,3 +519,39 @@ exports.getAllWaitlist = async (req, res) => {
   }
 };
 
+
+exports.getKycMode = async (req, res) => {
+  try {
+    const setting = await systemSettingModel.findOne({ key: "app_settings" });
+    return res.status(200).json({
+      success: true,
+      isKycEnforced: setting ? setting.isKycEnforced : true,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.setKycMode = async (req, res) => {
+  try {
+    const { isKycEnforced } = req.body;
+    if (typeof isKycEnforced !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "isKycEnforced must be a boolean",
+      });
+    }
+    const setting = await systemSettingModel.findOneAndUpdate(
+      { key: "app_settings" },
+      { isKycEnforced, updatedBy: req.user.id },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    return res.status(200).json({
+      success: true,
+      message: `KYC enforcement ${isKycEnforced ? "enabled" : "disabled"}`,
+      isKycEnforced: setting.isKycEnforced,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

@@ -1,15 +1,65 @@
-
 openapi: 3.0.0
-info: 
+info:
   title: Documentation for HedgeNest KYC
-  version: 1.0.0
-  description: HedgeNest for KYC
-paths: 
-  /api/v1/verify:
+  version: 2.0.0
+  description: |
+    KYC via MetaMap. Tier 1 (NIN) is live. Tier 2 (face liveness) is not implemented yet.
+    Gated endpoints return 403 `KYC_TIER_REQUIRED` unless an admin turns KYC mode off.
+paths:
+  /api/v1/kyc/tier1/initiate:
     post:
-      summary: this end point is for verifying KYC for tier 1
+      summary: Get the MetaMap SDK launch details for Tier 1 (NIN) verification
       tags: [kyc]
-      security: 
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Launch the MetaMap web button with `clientId`, `flowId` and `metadata` from `data`
+        "400":
+          description: Already verified
+        "503":
+          description: MetaMap is not configured on the server
+  /api/v1/kyc/tier2/initiate:
+    post:
+      summary: Tier 2 (face liveness) - not available yet
+      tags: [kyc]
+      security:
+        - bearerAuth: []
+      responses:
+        "501":
+          description: KYC_TIER2_UNAVAILABLE
+  /api/v1/kyc/status:
+    get:
+      summary: Current tier and latest verification status
+      tags: [kyc]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "`data.status` is one of not_started, pending, verified, rejected, needs_review"
+  /api/v1/kyc/webhook:
+    post:
+      summary: MetaMap webhook receiver (called by MetaMap only)
+      description: Requires a valid `x-signature` header (HMAC-SHA256 of the raw body with METAMAP_WEBHOOK_SECRET).
+      tags: [kyc]
+      responses:
+        "200":
+          description: Processed or ignored
+        "401":
+          description: Invalid signature
+  /api/v1/admin/kyc-mode:
+    get:
+      summary: Get whether KYC is enforced globally
+      tags: [kyc]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "{ success, isKycEnforced }"
+    patch:
+      summary: Turn KYC enforcement on or off
+      tags: [kyc]
+      security:
         - bearerAuth: []
       requestBody:
         required: true
@@ -17,38 +67,10 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - id
+              required: [isKycEnforced]
               properties:
-                id: 
-                  type: string
-                  example: "55555555555"
-      responses: 
+                isKycEnforced:
+                  type: boolean
+      responses:
         "200":
-          description: KYC uploaded successfully
-        "400":
-          description: something went wrong
-           
-  /api/v1/uploadUtilityBill:
-    put:
-      summary: this end point is for uploading KYC for tier 2
-      tags: [kyc]
-      security: 
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - utilityBill
-              properties:
-                utilityBill: 
-                  type: string
-                  format: binary
-      responses: 
-        "200":
-          description: KYC uploaded successfully
-        "400":
-          description: something went wrong
+          description: Updated

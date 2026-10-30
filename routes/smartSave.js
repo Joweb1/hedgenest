@@ -1,12 +1,13 @@
+const { requireTier } = require('../middleware/checkTier')
 const router = require ('express').Router()
 const {previewPlan, createPlan, breakPlan, topUpFlexible, getAllPlan, getOnePlan, getUserWithPlan, getUserWithPlans, getPreviewPlan} = require ('../controller/smartSave')
 const {Authentication} = require ('../middleware/auth');
 const { createPlanValidator } = require('../middleware/validators');
 
 router.post('/preview-plan', Authentication, previewPlan);
-router.post('/create-plan', Authentication, createPlanValidator, createPlan)
+router.post('/create-plan', Authentication, requireTier(1), createPlanValidator, createPlan)
 router.post('/break-plan/:planId', Authentication, breakPlan)
-router.post('/top-up/:savingId', Authentication, topUpFlexible)
+router.post('/top-up/:savingId', Authentication, requireTier(1), topUpFlexible)
 
 router.get('/get-all-plan', Authentication, getAllPlan)
 router.get('/get-one-plan/:id',Authentication,  getOnePlan)

@@ -19,6 +19,24 @@ const ALLOWED_AMOUNT_RANGES = [
   "below-5000",
 ];
 
+const ALLOWED_USER_TYPES = [
+  "student",
+  "salaried",
+  "freelancer",
+  "entrepreneur",
+];
+
+const ALLOWED_GENDERS = ["male", "female", "other"];
+
+// Normalizes Nigerian numbers (0803..., 234803..., +234803...) to +234XXXXXXXXXX.
+// Returns null when the input is not a valid Nigerian mobile number.
+const normalizeNigerianPhone = (input) => {
+  if (typeof input !== "string") return null;
+  const digits = input.replace(/[\s\-()]/g, "").replace(/^\+/, "");
+  const match = digits.match(/^(?:234|0)?([789][01]\d{8})$/);
+  return match ? `+234${match[1]}` : null;
+};
+
 const waitlistSchema = new mongoose.Schema(
   {
     firstName: {
@@ -37,6 +55,24 @@ const waitlistSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
+    },
+    phoneNumber: {
+      type: String,
+      trim: true,
+      default: undefined,
+    },
+    gender: {
+      type: String,
+      enum: ALLOWED_GENDERS,
+      trim: true,
+      lowercase: true,
+      default: undefined,
+    },
+    userType: {
+      type: String,
+      enum: ALLOWED_USER_TYPES,
+      trim: true,
+      default: undefined,
     },
     amountRange: {
       type: String,
@@ -103,9 +139,18 @@ const waitlistSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Unique only where a phone number exists, so legacy records without one don't collide.
+waitlistSchema.index(
+  { phoneNumber: 1 },
+  { unique: true, partialFilterExpression: { phoneNumber: { $type: "string" } } }
+);
+
 const waitlistModel = mongoose.model("waitlist", waitlistSchema);
 
 module.exports = {
   waitlistModel,
   ALLOWED_AMOUNT_RANGES,
+  ALLOWED_USER_TYPES,
+  ALLOWED_GENDERS,
+  normalizeNigerianPhone,
 };

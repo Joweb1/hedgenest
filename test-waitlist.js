@@ -20,6 +20,9 @@ async function runTests() {
       firstName: "Adaeze",
       lastName: "Agnes",
       email: uniqueEmail,
+      phoneNumber: `080${Math.floor(10000000 + Math.random() * 89999999)}`,
+      gender: "female",
+      userType: "freelancer",
       amountRange: "5000-100000-annually"
     };
 
@@ -52,6 +55,9 @@ async function runTests() {
       firstName: "Adaeze",
       lastName: "Agnes",
       email: uniqueEmail,
+      phoneNumber: `080${Math.floor(10000000 + Math.random() * 89999999)}`,
+      gender: "female",
+      userType: "freelancer",
       amountRange: "5000-100000-annually"
     };
 
@@ -82,6 +88,9 @@ async function runTests() {
       firstName: "Adaeze",
       lastName: "Agnes",
       email: verifiedEmail,
+      phoneNumber: `080${Math.floor(10000000 + Math.random() * 89999999)}`,
+      gender: "female",
+      userType: "freelancer",
       amountRange: "5000-100000-annually"
     });
     // Verify
@@ -94,6 +103,9 @@ async function runTests() {
       firstName: "Adaeze",
       lastName: "Agnes",
       email: verifiedEmail,
+      phoneNumber: `080${Math.floor(10000000 + Math.random() * 89999999)}`,
+      gender: "female",
+      userType: "freelancer",
       amountRange: "5000-100000-annually"
     });
     console.error(`❌ Test 2b FAILED: Verified duplicate email should have been rejected!\n`);
@@ -155,6 +167,9 @@ async function runTests() {
       firstName: "Chidi",
       lastName: "Okafor",
       email: `chidi.${Date.now()}@example.com`,
+      phoneNumber: `080${Math.floor(10000000 + Math.random() * 89999999)}`,
+      gender: "female",
+      userType: "freelancer",
       amountRange: "5000-100000-annually",
     });
 
@@ -191,6 +206,9 @@ async function runTests() {
       firstName: "Emeka",
       lastName: "Nnamdi",
       email: unverifiedEmail,
+      phoneNumber: `080${Math.floor(10000000 + Math.random() * 89999999)}`,
+      gender: "female",
+      userType: "freelancer",
       amountRange: "5000-100000-annually",
     });
 
@@ -220,6 +238,9 @@ async function runTests() {
       firstName: "Tunde",
       lastName: "Bakare",
       email: referrerEmail,
+      phoneNumber: `080${Math.floor(10000000 + Math.random() * 89999999)}`,
+      gender: "female",
+      userType: "freelancer",
       amountRange: "5000-100000-annually",
     });
     const referrerCode = userARes.data.data.referralCode;
@@ -231,6 +252,9 @@ async function runTests() {
       firstName: "Kemi",
       lastName: "Adesanya",
       email: inviteeEmail,
+      phoneNumber: `080${Math.floor(10000000 + Math.random() * 89999999)}`,
+      gender: "female",
+      userType: "freelancer",
       amountRange: "5000-100000-annually",
       referralCode: referrerCode,
     });

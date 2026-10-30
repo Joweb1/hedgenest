@@ -18,6 +18,9 @@ paths:
                 - firstName
                 - lastName
                 - email
+                - phoneNumber
+                - gender
+                - userType
                 - amountRange
               properties:
                 firstName:
@@ -29,6 +32,19 @@ paths:
                 email:
                   type: string
                   example: adaeze@gmail.com
+                phoneNumber:
+                  type: string
+                  example: "08031234567"
+                  description: Nigerian mobile number (080..., 234... or +234... accepted). Stored normalized as +234XXXXXXXXXX and must be unique.
+                gender:
+                  type: string
+                  enum: [male, female, other]
+                  example: female
+                userType:
+                  type: string
+                  enum: [student, salaried, freelancer, entrepreneur]
+                  example: freelancer
+                  description: "What best describes you? student = Student, salaried = Salaried Work/Paid Employment, freelancer = Freelance/Remote Work, entrepreneur = Entrepreneur/Business Owner"
                 amountRange:
                   type: string
                   example: 5000-100000-annually
